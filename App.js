@@ -1,20 +1,34 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { Home, Groceries, Recipes } from './screens/index';
+
+const Drawer = createDrawerNavigator();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Drawer.Navigator
+        initialRouteName="Home"
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: '#148B4E', // Custom header color
+            shadowColor: '#000', // Shadow color for iOS
+            shadowOpacity: 0.2, // Shadow opacity for iOS
+            shadowOffset: { width: 0, height: 4 }, // Shadow offset for iOS
+            shadowRadius: 4, // Shadow radius for iOS
+            elevation: 4, // Shadow for Android
+          },
+          headerTintColor: '#FFF', // Text and icon color in header
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      >
+        <Drawer.Screen name="Home" component={Home} />
+        <Drawer.Screen name="Recipes" component={Recipes} />
+        <Drawer.Screen name="Groceries" component={Groceries} />
+      </Drawer.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
