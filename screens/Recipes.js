@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   mainContainer: {
-    // margin: 10,
+    flex: 1,
   },
   selectionView: {
     // position: 'absolute'
@@ -113,7 +113,6 @@ const styles = StyleSheet.create({
   recipesContainer: {
     marginTop: 5,
     marginHorizontal: 10,
-    paddingBottom: 50,
   },
   recipeCard: {
     // height: Dimensions.get('window').height * 0.35, // 35% of the screen height
@@ -131,8 +130,8 @@ const styles = StyleSheet.create({
     width: '100%', // Full width of the card
     height: undefined, // Let height be calculated based on aspect ratio
     aspectRatio: 16 / 9, // Maintain a 16:9 aspect ratio
-    // borderTopLeftRadius: 10,
-    // borderTopRightRadius: 10, // Round the top corners of the image
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10, // Round the top corners of the image
   },
   recipeText: {
     fontSize: 18,
