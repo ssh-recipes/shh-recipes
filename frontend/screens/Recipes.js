@@ -24,15 +24,9 @@ export default function Recipes() {
   };
   
   //sortFilters
-  const [selectedSortFilters, setSelectedSortFilters] = useState([]);
-  
-  const toggleSortFilters = (filter) => {
-    if (selectedSortFilters.includes(filter)) {
-      setSelectedSortFilters(selectedSortFilters.filter((item) => item !== filter));
-    } else {
-      setSelectedSortFilters([...selectedSortFilters, filter]);
-    }
-  };
+  const [selectedSortFilter, setSelectedSortFilter] = useState([]);
+
+  const toggleSortFilter = (filter) => setSelectedSortFilter([filter]);
   
   // Modal visibility state for the filters menu
   const [isFilterModalVisible, setFilterModalVisible] = useState(false);
@@ -64,14 +58,14 @@ return (
               key={index}
               style={[
                 styles.filterButton,
-                selectedSortFilters.includes(filter) && styles.filterButtonActive,
+                selectedSortFilter.includes(filter) && styles.filterButtonActive,
               ]}
-              onPress={() => toggleSortFilters(filter)}
+              onPress={() => toggleSortFilter(filter)}
             >
               <Text
                 style={[
                   styles.filterText,
-                  selectedSortFilters.includes(filter) && styles.filterTextActive,
+                  selectedSortFilter.includes(filter) && styles.filterTextActive,
                 ]}
               >
                 {filter}
