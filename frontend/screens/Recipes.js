@@ -2,18 +2,86 @@ import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { Modal } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const filters = ['Halal', 'Gluten Free', 'Dairy Free', 'Vegan', 'Vegetarian', 'Keto', 'Paleo', 'Low Carb'];
 const sortFilters = ['Smart Filter', 'Frequently Cooked', 'Favourites', 'Available to cook']
+// Example recipes, will use fetch from backend
+
 const recipes = [
-  { id: 1, title: "Nice food good food we love it. Recipe 1", image: "https://ichef.bbci.co.uk/food/ic/food_16x9_1600/recipes/chicken_spinach_gnocchi_16914_16x9.jpg" },
-  { id: 2, title: "Nice food good food we love it. Recipe 2", image: "https://ichef.bbci.co.uk/food/ic/food_16x9_1600/recipes/chickencasserole_85719_16x9.jpg" },
-  { id: 3, title: "Nice food good food we love it. Recipe 3", image: "https://ichef.bbci.co.uk/food/ic/food_16x9_1600/recipes/easy_spaghetti_bolognese_93639_16x9.jpg" },
+  { id: 1, 
+    title: "Chicken Spinach Gnocchi", 
+    image: "https://ichef.bbci.co.uk/food/ic/food_16x9_1600/recipes/chicken_spinach_gnocchi_16914_16x9.jpg",
+    description: "Good gnocchi",
+    videoUrl: "",
+    ingredients:[
+      { name: 'Chicken', quantity: '200g', available: true },
+      { name: 'Spinach', quantity: '100g', available: true },
+      { name: 'Gnocchi', quantity: '250g', available: false }
+    ],
+    rating: 4.5,
+    isFavourite: false,
+    lastCooked: "2024-11-20"
+  },
+  { id: 2,
+    title: "Chicken Casserole",
+    image: "https://ichef.bbci.co.uk/food/ic/food_16x9_1600/recipes/chickencasserole_85719_16x9.jpg",
+    description: "Good Casserole",
+    videoUrl: "",
+    ingredients:[
+      { name: 'Chicken', quantity: '500g', available: true },
+      { name: 'Carrots', quantity: '2 large, sliced', available: true },
+      { name: 'Onion', quantity: '1 medium, chopped', available: false },
+      { name: 'Garlic', quantity: '2 cloves, minced', available: true },
+      { name: 'Potatoes', quantity: '3 medium, peeled and cubed', available: true },
+      { name: 'Celery', quantity: '2 stalks, chopped', available: true },
+      { name: 'Chicken stock', quantity: '500ml', available: false },
+      { name: 'Frozen peas', quantity: '100g', available: true },
+      { name: 'Thyme', quantity: '1 tsp', available: true },
+      { name: 'Bay leaves', quantity: '2', available: true },
+      { name: 'Salt', quantity: 'to taste', available: true },
+      { name: 'Black pepper', quantity: 'to taste', available: true }
+    ],
+    rating: 4.5,
+    isFavourite: false,
+    lastCooked: "2024-11-20"
+  },
+  { id: 3,
+    title: "Easy Spaghetti Bolognese",
+    image: "https://ichef.bbci.co.uk/food/ic/food_16x9_1600/recipes/easy_spaghetti_bolognese_93639_16x9.jpg",
+    description: "Good bolognese",
+    videoUrl: "",
+    ingredients:[
+      { name: 'spaghetti', quantity: '200g', available: true },
+      { name: 'tomato', quantity: '100g', available: true },
+      { name: 'onions', quantity: '250g', available: false }
+    ],
+    rating: 4.5,
+    isFavourite: true,
+    lastCooked: "2024-11-20"
+  },
 ];
 
-export default function Recipes() {
 
-  //filters
+export default function Recipes() {
+  
+  //Set Recipe Favourite
+  const [favourite, setFavourite] = useState([]);
+  const toggleFavourite = (recipeId) => {
+    if(favourite.includes(recipeId)){
+      setFavourite(favourite.filter((item) => item !== recipeId));
+    }
+    else{
+      setFavourite([...favourite, recipeId]);
+    }
+  };
+  
+  // All ingredients available
+  const allIngredientsAvailable = (recipe) => {
+    return recipe.ingredients.every(ingredient => ingredient.available);
+  };
+
+  //Filters
   const [selectedFilters, setSelectedFilters] = useState([]);
   const toggleFilter = (filter) => {
     if (selectedFilters.includes(filter)) {
@@ -23,10 +91,9 @@ export default function Recipes() {
     }
   };
   
-  //sortFilters
-  const [selectedSortFilter, setSelectedSortFilter] = useState([]);
-
-  const toggleSortFilter = (filter) => setSelectedSortFilter([filter]);
+  //Sort Filters
+  const [selectedSortFilter, setSelectedSortFilter] = useState("");
+  const toggleSortFilter = (filter) => setSelectedSortFilter(filter === selectedSortFilter ? null : filter);
   
   // Modal visibility state for the filters menu
   const [isFilterModalVisible, setFilterModalVisible] = useState(false);
@@ -58,7 +125,7 @@ return (
               key={index}
               style={[
                 styles.filterButton,
-                selectedSortFilter.includes(filter) && styles.filterButtonActive,
+                selectedSortFilter === filter && styles.filterButtonActive,
               ]}
               onPress={() => toggleSortFilter(filter)}
             >
@@ -120,8 +187,47 @@ return (
         <ScrollView contentContainerStyle={styles.recipesContainer}>
           {recipes.map((recipe) => (
             <View key={recipe.id} style={styles.recipeCard}>
+              {/* Recipe Image */}
               <Image source={{ uri: recipe.image }} style={styles.recipeImage} />
-              <Text style={styles.recipeText}>{recipe.title}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {/* Recipe Title */}
+                <Text style={[styles.recipeText, { fontWeight: 'bold' }]}>
+                  {"Recipe: "}
+                </Text>
+                <Text style={styles.recipeText}>{recipe.title}</Text>
+                {/*Ingredient Availability*/}
+                <Text
+                  style={[
+                    styles.recipeText,
+                    allIngredientsAvailable(recipe) ? styles.available : styles.missing,
+                     { marginLeft: 10 }
+                  ]}
+                >
+                  {allIngredientsAvailable(recipe) ? 'All Ingredients Available' : 'Ingredients Missing'}
+                </Text>
+              </View>
+
+
+              {/* Recipe Description */}
+              <Text style={styles.recipeText}>{"Description: " + recipe.description}</Text>
+              {/* Recipe Rating */}
+              <Text style={styles.recipeText}>{recipe.rating + '/5 Rating'}</Text>
+              {/*Is Favourite*/}
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TouchableOpacity onPress={() => toggleFavourite(recipe.id)}>
+                  <Text style={styles.favoriteText}>
+                    {/* Conditional rendering: if the recipe is a favorite, show a filled star, otherwise show an empty star */}
+                    <Icon 
+                      name={favourite.includes(recipe.id) ? 'star' : 'star-o'}  // 'star' for filled, 'star-o' for empty
+                      size={30}  // Keep the size consistent
+                      color={favourite.includes(recipe.id) ? 'gold' : 'gray'}  // 'gold' for filled, 'gray' for empty
+                      style={{ paddingLeft: 10 }}
+                  />
+                </Text>
+              </TouchableOpacity>
+                {/*Last Cooked*/}
+                <Text style={styles.recipeText}>{"Date: " + recipe.lastCooked}</Text>
+              </View>
             </View>
           ))}
         </ScrollView>
@@ -257,5 +363,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     textAlign: 'center',
+  },
+  available: {
+    color: 'green',  
+    fontWeight: 'bold',
+  },
+  missing: {
+    color: 'red',    
+    fontWeight: 'bold',
   },
 });
