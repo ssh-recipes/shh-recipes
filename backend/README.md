@@ -8,6 +8,9 @@ Copy the .env template file, and fill it out. PORT can be anything, using someth
 
 You will need a SQL database. SQL_DATABASE name can be anything too.
 
+`npm run seed`
+This will setup the database, aswell as introduce some mock recipes.
+
 `npm run dev`
 This will run the development script, which will automatically restart the server upon files being changed.
 

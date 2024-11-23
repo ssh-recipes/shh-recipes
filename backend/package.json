@@ -4,6 +4,7 @@
 	"main": "index.js",
 	"scripts": {
 		"dev": "nodemon src/index.js",
+		"seed": "node src/seed.js",
 		"main": "node src/index.js"
 	},
 	"author": "",
