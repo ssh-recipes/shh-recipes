@@ -1,5 +1,5 @@
 const { config } = require('dotenv');
-config();
+config({ path: '.env.local' });
 
 const { serve } = require('@hono/node-server');
 const { Hono } = require('hono');
