@@ -3,6 +3,9 @@
 `npm install -g nodemon`
 Nodemon is used to automatically restart the server upon files being changed
 
+`npm install`
+Install dependencies locally
+
 `cp .env.template .env.local`
 Copy the .env template file, and fill it out. PORT can be anything, using something like 8080 is standard.
 
