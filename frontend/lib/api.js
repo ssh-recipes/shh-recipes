@@ -39,7 +39,7 @@ export const getRules = () => {
 		"description": "Does not contain milk or milk products, including cheese, butter, or any dairy derivatives."
 	    },
 	    {
-		"id": "halal",
+		"id": "hala",
 		"name": "Halal",
 		"description": "Adheres to Islamic dietary laws, including the prohibition of pork, alcohol, and non-Halal-certified meat."
 	    }
@@ -61,19 +61,9 @@ export const getRule = (ruleId) => { // i don't think would be used, but added f
 
 // PUT /rules/:ruleId
 // body: {
-// 	"enabled": true
+// 	"enabled": boolean
 // }
-export const enableRule = (ruleId) => {
-    return {
-	"success": true,
-    }
-}
-//
-// PUT /rules/:ruleId
-// body: {
-// 	"enabled": false
-// }
-export const disableRule = (ruleId) => {
+export const setIsRuleEnabled = (id, enabled) => {
     return {
 	"success": true,
     }
@@ -165,19 +155,9 @@ export const getRecipe = async (id) => {
 
 // PUT /recipes/:recipeId
 // body: {
-// 	"favourite": true
+// 	"favourite": boolean
 // }
-export const favouriteRecipe = async (id) => {
-    return {
-	"success": true,
-    }
-}
-
-// PUT /recipes/cheese_omellete
-// body: {
-// 	"favourite": false
-// }
-export const unfavouriteRecipe = async (id) => {
+export const setIsRecipeFavourite = async (recipeId, favourite) => {
     return {
 	"success": true,
     }
