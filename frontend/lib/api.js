@@ -16,7 +16,7 @@
 //
 
 // GET /user
-export const getUser = () => {
+export const getUser = async () => {
     return {
 	"success": true,
 	"data": {
@@ -29,7 +29,7 @@ export const getUser = () => {
 }
 
 // GET /rules
-export const getRules = () => {
+export const getRules = async () => {
     return {
 	"success": true,
 	"data": [
@@ -48,7 +48,7 @@ export const getRules = () => {
 }
 
 // GET /rules/:ruleId
-export const getRule = (ruleId) => { // i don't think would be used, but added for parity
+export const getRule = async (ruleId) => { // i don't think would be used, but added for parity
     return {
 	"success": true,
 	"data": {
@@ -63,7 +63,7 @@ export const getRule = (ruleId) => { // i don't think would be used, but added f
 // body: {
 // 	"enabled": boolean
 // }
-export const setIsRuleEnabled = (id, enabled) => {
+export const setIsRuleEnabled = async (id, enabled) => {
     return {
 	"success": true,
     }
@@ -71,7 +71,7 @@ export const setIsRuleEnabled = (id, enabled) => {
 
 // GET /recipes
 // params: category, skip & take
-export const getRecipes = (category, skip, take) => {
+export const getRecipes = async (category, skip, take) => {
     return {
 	"success": true,
 	"data": [
