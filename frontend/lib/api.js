@@ -153,7 +153,6 @@ export const getRecipe = async (id) => {
 	    "last_cooked": undefined
 	},
     }
-
 }
 
 // PUT /recipes/:recipeId/favourite
