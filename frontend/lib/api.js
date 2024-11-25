@@ -96,6 +96,7 @@ export const getRecipes = async (category, skip, take) => {
 			"unit": "ml"
 		    }
 		],
+		"times_cooked": 25000, // this is the total amount cooked, not per user
 		"favourite": false,
 		"last_cooked": null, // last cooked may be null
 	    },
@@ -114,6 +115,7 @@ export const getRecipes = async (category, skip, take) => {
 			"unit": "quantity"
 		    }
 		],
+		"times_cooked": 50000,
 		"favourite": true,
 		"last_cooked": new Date(new Date().getTime() - 10 * 60 * 1000) // 10 minutes ago
 	    }
@@ -146,6 +148,7 @@ export const getRecipe = async (id) => {
 		    "unit": "ml"
 		}
 	    ],
+	    "times_cooked": 25000,
 	    "favourite": false,
 	    "last_cooked": undefined
 	},
@@ -153,11 +156,18 @@ export const getRecipe = async (id) => {
 
 }
 
-// PUT /recipes/:recipeId
+// PUT /recipes/:recipeId/favourite
 // body: {
 // 	"favourite": boolean
 // }
 export const setIsRecipeFavourite = async (recipeId, favourite) => {
+    return {
+	"success": true,
+    }
+}
+
+// POST /recipes/:recipeId/cooked
+export const recordRecipeCooked = async (recipeId) => {
     return {
 	"success": true,
     }
