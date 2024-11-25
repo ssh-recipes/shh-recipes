@@ -44,7 +44,7 @@ export const getRules = async () => {
 		"description": "Adheres to Islamic dietary laws, including the prohibition of pork, alcohol, and non-Halal-certified meat."
 	    }
 	]
-    ]
+    }
 }
 
 // GET /rules/:ruleId
