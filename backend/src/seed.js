@@ -47,7 +47,8 @@ const seed = async () => {
 	    icon VARCHAR(255) NOT NULL,
 	    video VARCHAR(255),
             description TEXT,
-	    instructions TEXT
+	    instructions TEXT,
+	    times_cooked INT
         )
     `);
 
@@ -106,13 +107,13 @@ const seed = async () => {
     await db.query(`INSERT INTO IngredientRule (ingredient_id, rule_id) VALUES ('milk', 'dairy')`);
 
     await db.query(`
-        INSERT INTO Recipe (id, name, icon, video, description, instructions)
-        VALUES ('cheese_omellete', 'Cheese Omelette', 'cheese_omelette', 'pfXVx9xYXlE', 'A delicious cheese omelette.', 'Whisk eggs and add cheese.')
+        INSERT INTO Recipe (id, name, icon, video, description, instructions, times_cooked)
+        VALUES ('cheese_omellete', 'Cheese Omelette', 'cheese_omelette', 'pfXVx9xYXlE', 'A delicious cheese omelette.', 'Whisk eggs and add cheese.', 0)
     `);
 
     await db.query(`
-        INSERT INTO Recipe (id, name, icon, video, description, instructions)
-        VALUES ('carrot_salad', 'Carrot Salad', 'carrot_salad.png', '48apTozJfo4', 'A healthy carrot salad.', 'Grate carrots and add dressing.')
+        INSERT INTO Recipe (id, name, icon, video, description, instructions, times_cooked)
+        VALUES ('carrot_salad', 'Carrot Salad', 'carrot_salad.png', '48apTozJfo4', 'A healthy carrot salad.', 'Grate carrots and add dressing.', 0)
     `);
 
     await db.query(`
