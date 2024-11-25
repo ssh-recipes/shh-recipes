@@ -1,4 +1,7 @@
-const mysql = require('mysql2/promise');
+import { config } from "dotenv";
+config({ path: ".env.local" });
+
+import mysql from 'mysql2/promise';
 
 let pool = mysql.createPool({
     host: process.env.SQL_HOST,
@@ -11,4 +14,4 @@ let pool = mysql.createPool({
     queueLimit: 0,
 });
 
-module.exports = pool;
+export default pool;

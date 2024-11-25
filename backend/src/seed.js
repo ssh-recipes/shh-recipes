@@ -1,7 +1,7 @@
-const { config } = require('dotenv');
-config({ path: '.env.local' });
+import { config } from "dotenv";
+config({ path: ".env.local" });
 
-const db = require('./db');
+import db from './db.js';
 
 const seed = async () => {
     // Delete tables if they exist
