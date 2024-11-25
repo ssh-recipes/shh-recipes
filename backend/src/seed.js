@@ -20,7 +20,8 @@ const seed = async () => {
 
     await db.query(`
         CREATE TABLE User (
-            id INTEGER AUTO_INCREMENT PRIMARY KEY
+            id INTEGER AUTO_INCREMENT PRIMARY KEY,
+	    name VARCHAR(255) NOT NULL
         )
     `);
 
@@ -30,7 +31,7 @@ const seed = async () => {
             name VARCHAR(255) NOT NULL
         )
     `);
-    
+     
     await db.query(`
         CREATE TABLE Rule (
             id VARCHAR(255) PRIMARY KEY,
@@ -130,7 +131,7 @@ const seed = async () => {
     `);
 
     // Mock user
-    const userResult = await db.query(`INSERT INTO User () VALUES ()`);
+    const userResult = await db.query(`INSERT INTO User (name) VALUES ("Demo Account")`);
 
     await db.query(`INSERT INTO UserIngredient (user_id, ingredient_id, quantity) VALUES (1, 'milk', 1000)`);
     await db.query(`INSERT INTO UserIngredient (user_id, ingredient_id, quantity) VALUES (1, 'carrot', 200)`);
