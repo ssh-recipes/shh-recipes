@@ -56,7 +56,7 @@ export const getRule = async (ruleId) => { // i don't think would be used, but a
 	    "name": "Dairy-Free",
 	    "description": "Does not contain milk or milk products, including cheese, butter, or any dairy derivatives."
 	}
-    ]
+    }
 }
 
 // PUT /rules/:ruleId
