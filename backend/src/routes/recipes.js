@@ -65,13 +65,14 @@ app.get('/:recipeId', async (c) => {
 
 app.post('/:recipeId/cooked', async (c) => {
     try {
+        const userId = c.get('user')["id"];
         const recipeId = c.req.param('recipeId');
 
         await db.query('UPDATE Recipe SET times_cooked = times_cooked + 1 WHERE id = ?', [recipeId]);
 
         await db.query(
-            'UPDATE UserRecipe SET last_cooked = CURRENT_DATE, favourite = favourite + 1 WHERE user_id = 1 AND recipe_id = ?',
-            [recipeId]
+            'UPDATE UserRecipe SET last_cooked = CURRENT_DATE, favourite = favourite + 1 WHERE user_id = ? AND recipe_id = ?',
+            [userId,recipeId]
         );
 
         return c.json({ success: true });
