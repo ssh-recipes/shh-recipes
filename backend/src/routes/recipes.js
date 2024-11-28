@@ -63,5 +63,24 @@ app.get('/:recipeId', async (c) => {
     }
 });
 
+app.post('/:recipeId/cooked', async (c) => {
+    try {
+        const recipeId = c.req.param('recipeId');
+
+        await db.query('UPDATE Recipe SET times_cooked = times_cooked + 1 WHERE id = ?', [recipeId]);
+
+        await db.query(
+            'UPDATE UserRecipe SET last_cooked = CURRENT_DATE, favourite = favourite + 1 WHERE user_id = 1 AND recipe_id = ?',
+            [recipeId]
+        );
+
+        return c.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        return c.json({ success: false, error: 'Error recording recipe cooked' }, 500);
+    }
+});
+
+
 
 export default app;
