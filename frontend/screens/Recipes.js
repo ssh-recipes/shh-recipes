@@ -6,13 +6,15 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 const filters = ['Halal', 'Gluten Free', 'Dairy Free', 'Vegan', 'Vegetarian', 'Keto', 'Paleo', 'Low Carb'];
 const sortFilters = ['Smart Filter', 'Frequently Cooked', 'Favourites', 'Available to cook']
+const primaryFontSize = 16
+const secondaryFontSize = 14
 // Example recipes, will use fetch from backend
 
 const recipes = [
   { id: 1, 
-    title: "Chicken Spinach Gnocchi", 
+    title: "Chicken & Spinach Gnocchi (Serves 2-3)", 
     image: "https://ichef.bbci.co.uk/food/ic/food_16x9_1600/recipes/chicken_spinach_gnocchi_16914_16x9.jpg",
-    description: "Good gnocchi",
+    description: "a comforting, savory dish with tender chicken",
     videoUrl: "",
     ingredients:[
       { name: 'Chicken', quantity: '200g', available: true },
@@ -20,14 +22,14 @@ const recipes = [
       { name: 'Gnocchi', quantity: '250g', available: false }
     ],
     rating: 1,
-    filter: "Halal",
+    filters: ['Halal', 'Gluten Free'],
     isFavourite: false,
     lastCooked: "2024-11-20"
   },
   { id: 2,
-    title: "Chicken Casserole",
+    title: "Homemade Chicken Casserole",
     image: "https://ichef.bbci.co.uk/food/ic/food_16x9_1600/recipes/chickencasserole_85719_16x9.jpg",
-    description: "Good Casserole",
+    description: "with garlic and chilli",
     videoUrl: "",
     ingredients:[
       { name: 'Chicken', quantity: '500g', available: true },
@@ -44,14 +46,14 @@ const recipes = [
       { name: 'Black pepper', quantity: 'to taste', available: true }
     ],
     rating: 4.5,
-    filter: "Halal",
+    filters: ['Halal'],
     isFavourite: false,
     lastCooked: "2024-11-20"
   },
   { id: 3,
     title: "Easy Spaghetti Bolognese",
     image: "https://ichef.bbci.co.uk/food/ic/food_16x9_1600/recipes/easy_spaghetti_bolognese_93639_16x9.jpg",
-    description: "Good bolognese",
+    description: "with fresh tomatoes",
     videoUrl: "",
     ingredients:[
       { name: 'spaghetti', quantity: '200g', available: true },
@@ -59,7 +61,7 @@ const recipes = [
       { name: 'onions', quantity: '250g', available: false }
     ],
     rating: 3,
-    filter: "Halal",
+    filters: [],
     isFavourite: true,
     lastCooked: "2024-11-20"
   },
@@ -123,28 +125,28 @@ return (
         <TouchableOpacity style={styles.filterButton} onPress={openFilterModal}>
           <Text style={styles.filterText}>Filters</Text>
         </TouchableOpacity>
-          {sortFilters.map((filter, index) => (
-            <TouchableOpacity
-              key={index}
+        {/* Filter Button */}
+        {sortFilters.map((filter, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles.filterButton,
+              selectedSortFilter === filter && styles.filterButtonActive, // Apply active style based on selected filter
+            ]}
+            onPress={() => toggleSortFilter(filter)} // Toggle selection on press
+          >
+            <Text
               style={[
-                styles.filterButton,
-                selectedSortFilter === filter && styles.filterButtonActive,
+                styles.filterText,
+                selectedSortFilter === filter && styles.filterTextActive, // Apply active text style based on selected filter
               ]}
-              onPress={() => toggleSortFilter(filter)}
             >
-              <Text
-                style={[
-                  styles.filterText,
-                  selectedSortFilter.includes(filter) && styles.filterTextActive,
-                ]}
-              >
-                {filter}
-              </Text>
-            </TouchableOpacity>
-          ))}
+              {filter}
+            </Text>
+          </TouchableOpacity>
+        ))}
         </ScrollView>
       </View>
-
       {/* Filter Modal */}
       <Modal
         visible={isFilterModalVisible}
@@ -219,65 +221,69 @@ return (
               {/* Recipe Description */}
               </View>
               <Text style={styles.descriptionText}>{recipe.description}</Text>
-              {/* Recipe Rating */}
-              <View style={styles.starContainer}>
-                <Text style={styles.recipeText}>
-                  {[...Array(5)].map((_, index) => {
-                    // Determine if this is a full, half, or empty star
-                    if (index < Math.floor(recipe.rating)) {
-                      return (
-                        <Icon 
-                          key={index} 
-                          name="star" 
-                          size={20} 
-                          color="gold" 
-                        />
-                      );
-                    } else if (index < recipe.rating) {
-                      return (
-                        <Icon 
-                          key={index} 
-                          name="star-half-o" 
-                          size={20} 
-                          color="gold" 
-                        />
-                      );
-                    } else {
-                      return (
-                        <Icon 
-                          key={index} 
-                          name="star-o" 
-                          size={20} 
-                          color="gray" 
-                        />
-                      );
-                    }
-                  })}
-                </Text>
-              </View>
-                 {/* Ingredients Horizontal Scroll */}
-                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.ingredientsScroll}>
-  {recipe.ingredients.map((ingredient, index) => (
-    <Text
-      key={index}
-      style={[
-        styles.ingredientText,
-        !ingredient.available && styles.missingIngredientText, // Apply red color for missing ingredients
-      ]}
-    >
-      {ingredient.name} ({ingredient.quantity})
-    </Text>
-  ))}
-</ScrollView>
-
-                {/* Filters Below Recipe */}
+              {/* Filters and Stars Container */}
+              <View style={styles.filterAndStarsContainer}>
+                {/* Filters */}
                 <View style={styles.filtersContainer}>
-                  {recipe.filters && recipe.filters.map((filter, index) => (
-                    <Text key={index} style={styles.filterBadge}>
-                      {filter}
-                    </Text>
+                  {recipe.filters && recipe.filters.length > 0 && recipe.filters.map((filter, index) => (
+                    <React.Fragment key={index}>
+                      <Text style={styles.filterBadge}>
+                        {filter}
+                      </Text>
+                      {index < recipe.filters.length - 1 && <View style={styles.circle} />}  {/* Add circle between filters */}
+                    </React.Fragment>
                   ))}
                 </View>
+                {/* Stars Rating */}
+                <View style={styles.starContainer}>
+                  <Text style={styles.recipeText}>
+                    {[...Array(5)].map((_, index) => {
+                      if (index < Math.floor(recipe.rating)) {
+                        return (
+                          <Icon 
+                            key={index} 
+                            name="star" 
+                            size={20} 
+                            color="gold" 
+                          />
+                        );
+                      } else if (index < recipe.rating) {
+                        return (
+                          <Icon 
+                            key={index} 
+                            name="star-half-o" 
+                            size={20} 
+                            color="gold" 
+                          />
+                        );
+                      } else {
+                        return (
+                          <Icon 
+                            key={index} 
+                            name="star-o" 
+                            size={20} 
+                            color="gray" 
+                          />
+                        );
+                      }
+                    })}
+                  </Text>
+                </View>
+              </View>
+              {/* Ingredients Horizontal Scroll */}
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.ingredientsScroll}>
+                {recipe.ingredients.map((ingredient, index) => (
+                  <Text
+                    key={index}
+                    style={[
+                      styles.ingredientText,
+                      !ingredient.available && styles.missingIngredientText, // Apply red color for missing ingredients
+                    ]}
+                  >
+                    {ingredient.name} ({ingredient.quantity})
+                  </Text>
+                ))}
+              </ScrollView>
             </View>
           ))}
         </ScrollView>
@@ -288,6 +294,7 @@ return (
 }
 
 const styles = StyleSheet.create({
+  // Main container styles
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -295,16 +302,15 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
   },
+
+  // Filter Section
   selectionView: {
-    // position: 'absolute'
-    flexDirection: 'row', 
-    alignItems: 'center', 
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 10,
     marginTop: 10,
-    //paddingVertical: 10,
-    //paddingRight: 10,
     flexWrap: 'wrap',
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
   },
   scrollContainer: {
     alignItems: 'center',
@@ -336,19 +342,15 @@ const styles = StyleSheet.create({
   filterTextActive: {
     color: '#fff',
   },
-  contentText: {
-    marginTop: 20,
-    fontSize: 16,
-    textAlign: 'center',
-  },
+
+  // Recipe Card Section
   recipesContainer: {
     marginTop: 5,
     marginHorizontal: 10,
   },
   recipeCard: {
-    // height: Dimensions.get('window').height * 0.35, // 35% of the screen height
     backgroundColor: '#148B4E',
-    marginBottom: 20,
+    marginBottom: 10,
     borderRadius: 10,
     justifyContent: 'flex-start',
     shadowColor: '#000',
@@ -357,13 +359,99 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4, // Android shadows
   },
-  recipeImage: {
-    width: '100%', // Full width of the card
-    height: undefined, // Let height be calculated based on aspect ratio
-    aspectRatio: 16 / 9, // Maintain a 16:9 aspect ratio
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10, // Round the top corners of the image
+  recipeImageContainer: {
+    position: 'relative',
+    width: '100%',
+    height: undefined,
+    aspectRatio: 16 / 9, // Maintain aspect ratio
   },
+  recipeImage: {
+    width: '100%',
+    height: '100%', // Full container size
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  favoriteIconContainer: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 1, // Ensure it's above the image
+  },
+  exclamationIcon: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 1,
+  },
+  filterAndStarsContainer: {
+    flexDirection: 'row',  // Align filters and stars horizontally
+    justifyContent: 'space-between',  // Space out filters and stars
+    alignItems: 'center',  // Vertically center the content
+    paddingHorizontal: 5,
+  },
+
+  // Recipe Texts
+  recipeText: {
+    fontSize: primaryFontSize,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'left',
+    padding: 0,
+    marginLeft: 10,
+    marginTop: 5,
+    letterSpacing: 1,
+    textTransform: 'capitalize',
+  },
+  descriptionText: {
+    fontSize: secondaryFontSize,
+    marginLeft: 10,
+    color: '#fff',
+  },
+  starContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingRight: 5,
+  },
+
+  // Filter Badges (Applied to Recipe Filters)
+  filtersContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    marginTop: 5,
+    marginLeft: 5,
+  },
+  filterBadge: {
+    backgroundColor: '#148B4E',
+    color: '#fff',
+    borderRadius: 15,
+    fontSize: secondaryFontSize,
+    fontWeight: 'bold',
+  },
+  circle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,  // Makes it circular
+    backgroundColor: '#fff',
+    alignSelf: 'center',
+    marginHorizontal: 5,
+  },
+
+  // Ingredients Section
+  ingredientsScroll: {
+    paddingVertical : 5,
+  },
+  ingredientText: {
+    fontSize: secondaryFontSize,
+    color: '#fff',
+    marginLeft: 10,
+    fontStyle: 'italic',
+  },
+  missingIngredientText: {
+    color: 'red', // Font color for missing ingredients
+  },
+  // Modal Styles
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -384,7 +472,7 @@ const styles = StyleSheet.create({
   },
   scrollViewModal: {
     maxHeight: 300,
-    width: '100%',   
+    width: '100%',
   },
   modalCloseButton: {
     backgroundColor: '#148B4E',
@@ -407,117 +495,20 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
   },
+
+  // Content Styles
   available: {
-    color: 'green',  
+    color: 'green',
     fontWeight: 'bold',
   },
   missing: {
-    color: 'red',    
+    color: 'red',
     fontWeight: 'bold',
   },
-  descriptionText: {
-    fontSize: 16,
-    marginLeft: 10,
-    fontStyle: 'italic',  
-    fontFamily: 'Arial', 
-    color: '#fff',
-  },
-  recipeText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'left',
-    padding: 0,
-    marginLeft: 10,
-    letterSpacing: 1,
-    textTransform: 'capitalize', // Capitalize each word for better readability
-  },
-  starContainer: {
-    flexDirection: 'row',      // Align items in a row
-    justifyContent: 'flex-end', // Align the stars to the right
-    alignItems: 'center',      // Center the stars vertically (optional)
-    paddingRight: 10,          // Add some padding from the right edge (optional)
-  },
-  recipeImageContainer: {
-    position: 'relative',
-    width: '100%',
-    height: undefined,
-    aspectRatio: 16 / 9, // Maintain aspect ratio
-  },
-  
-  recipeImage: {
-    width: '100%',
-    height: '100%', // Full container size
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-  },
-  
-  favoriteIconContainer: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 1, // Ensure it's above the image
-  },
-  ingredientsContainer: {
-    marginTop: 10,
-    paddingHorizontal: 10,
-  },
-  ingredientItem: {
-    marginBottom: 5,
-  },
-  ingredientText: {
-    fontSize: 14,
-    color: '#fff',
-    fontStyle: 'italic',
-  },
-  exclamationIcon: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-  },
-  filtersContainer: {
-    flexDirection: 'row',  // To place filters horizontally
-    flexWrap: 'wrap',      // Allow wrapping if too many filters
-    marginTop: 10,         // Add some space between recipe info and filters
-  },
-  
-  filterBadge: {
-    backgroundColor: '#148B4E',
-    color: '#fff',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 15,
-    marginRight: 10,
-    marginBottom: 10,
-    fontWeight: 'bold',
-  },
-  
-  ingredientsScroll: {
-    marginTop: 10,
-    paddingVertical: 5,
-  },
-  /*
-  ingredientContainer: {
-    backgroundColor: '#eee',
-    borderRadius: 10,
-    paddingVertical: 5,
-    paddingHorizontal: 15,
-    marginRight: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  */
 
-  ingredientText: {
-    fontSize: 14,
-    fontFamily: 'Roboto',
-    marginLeft: 10,
-    color: 'white', // Default color for available ingredients
-  },
-  missingIngredientText: {
-    color: 'red', // Font color for missing ingredients
-  },
-  ingredientsScroll: {
-    paddingVertical: 10, // Optional for spacing
+  contentText: {
+    marginTop: 20,
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
