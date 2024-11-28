@@ -39,6 +39,29 @@ app.get('/:ruleId', async (c) => {
     }
 });
 
+app.put('/:ruleId', async (c) => {
+    try {
+        const userId = c.get('user')["id"];
+        const ruleId = c.req.param('ruleId');
+        const { enabled } = await c.req.json();
 
+        if (typeof enabled !== 'boolean') {
+            return c.json({ success: false, error: 'Invalid enabled value' }, 400);
+        }
+
+        if (enabled) {
+            
+            await db.query('INSERT INTO UserRule (user_id, rule_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE rule_id = rule_id', [userId,ruleId]);
+        } else {
+            
+            await db.query('DELETE FROM UserRule WHERE user_id = ? AND rule_id = ?', [userId,ruleId]);
+        }
+
+        return c.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        return c.json({ success: false, error: 'Error updating rule' }, 500);
+    }
+});
 
 export default app;
