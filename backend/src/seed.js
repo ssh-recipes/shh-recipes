@@ -10,6 +10,7 @@ const seed = async () => {
     await db.query("DROP TABLE IF EXISTS IngredientRule");
     await db.query("DROP TABLE IF EXISTS UserIngredient");
     await db.query("DROP TABLE IF EXISTS UserRecipe");
+     await db.query("DROP TABLE IF EXISTS UserRule");
     await db.query("DROP TABLE IF EXISTS Recipe");
     await db.query("DROP TABLE IF EXISTS Rule");
     await db.query("DROP TABLE IF EXISTS Ingredient");
@@ -97,6 +98,16 @@ const seed = async () => {
         )
     `);
 
+    await db.query(`
+        CREATE TABLE UserRule (
+            user_id INTEGER NOT NULL,
+            rule_id VARCHAR(255) NOT NULL,
+            PRIMARY KEY (user_id, rule_id),
+            FOREIGN KEY (user_id) REFERENCES User (id) ON DELETE CASCADE,
+            FOREIGN KEY (rule_id) REFERENCES Rule (id) ON DELETE CASCADE
+        )
+    `);
+
     // Seed mock data
 
     await db.query(`INSERT INTO Rule (id, name, description) VALUES ('dairy', 'Dairy', 'Contains milk or milk products, including cheese, butter, etc.') `);
@@ -140,6 +151,11 @@ const seed = async () => {
     await db.query(`
         INSERT INTO UserRecipe (user_id, recipe_id, favourite)
         VALUES (1, 'carrot_salad', TRUE)
+    `);
+
+    await db.query(`
+        INSERT INTO UserRule (user_id, rule_id) 
+        VALUES (1, 'dairy')
     `);
     
     console.log("Database seeded!");
