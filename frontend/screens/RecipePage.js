@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from "react-native";
 import YoutubePlayer from "react-native-youtube-iframe";
-import { WebView } from "react-native-webview";
 
 const recipe = {
   title: "Spaghetti Carbonara",
-  videoId: "3dBEz3kwzi0", // Replace with your YouTube video ID
+  videoId: "3dBEz3kwzi0",
   ingredients: [
     "200g Spaghetti",
     "100g Pancetta",
@@ -15,24 +14,58 @@ const recipe = {
   ],
   steps: [
     { text: "Cook the spaghetti according to the package instructions.", timestamp: 0 },
-    { text: "While the pasta is cooking, fry the pancetta until crispy.", timestamp: 10 },
-    { text: "In a bowl, whisk the eggs and grated Parmesan together.", timestamp: 20 },
-    { text: "Once the spaghetti is done, drain it and mix it with the pancetta.", timestamp: 30 },
-    { text: "Add the egg mixture to the pasta and toss quickly to create a creamy sauce.", timestamp: 40 },
-    { text: "Season with salt and pepper to taste and serve.", timestamp: 50 },
+    { text: "While the pasta is cooking, fry the pancetta until crispy.", timestamp: 50 },
+    { text: "In a bowl, whisk the eggs and grated Parmesan together.", timestamp: 100 },
+    { text: "Once the spaghetti is done, drain it and mix it with the pancetta.", timestamp: 150 },
+    { text: "Add the egg mixture to the pasta and toss quickly to create a creamy sauce.", timestamp: 200 },
+    { text: "Season with salt and pepper to taste and serve.", timestamp: 350 },
   ],
 };
 
 const RecipePage = () => {
   const [currentStage, setCurrentStage] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
   const scrollRef = useRef(null);
   const playerRef = useRef(null);
+  const intervalRef = useRef(null); // To keep track of the interval
+
+  useEffect(() => {
+    // Start the interval when the component mounts
+    intervalRef.current = setInterval(async () => {
+      if (playerRef.current) {
+        const time = await playerRef.current.getCurrentTime();
+        setCurrentTime(time); // Update current time
+      }
+    }, 500); // Poll every 500ms
+
+    return () => {
+      // Clear the interval when the component unmounts
+      clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    const nextStageIndex = recipe.steps.findIndex(
+      (step, index) =>
+        currentTime >= step.timestamp &&
+        currentTime < (recipe.steps[index + 1]?.timestamp || Infinity)
+    );
+
+    if (nextStageIndex !== -1 && nextStageIndex !== currentStage) {
+      setCurrentStage(nextStageIndex);
+
+      // Scroll to the respective step
+      scrollRef.current?.scrollTo({
+        y: nextStageIndex * 60, // Adjust based on step height
+        animated: true,
+      });
+    }
+  }, [currentTime]);
 
   const goToStage = (stageIndex) => {
     if (stageIndex < 0 || stageIndex >= recipe.steps.length) return;
 
     setCurrentStage(stageIndex);
-    // Seek to the desired timestamp in the video
     playerRef.current?.seekTo(recipe.steps[stageIndex].timestamp, true);
 
     // Scroll to the respective step
@@ -45,50 +78,21 @@ const RecipePage = () => {
   const nextStage = () => goToStage(currentStage + 1);
   const prevStage = () => goToStage(currentStage - 1);
 
-  const onProgress = (currentTime) => {
-    const nextStageIndex = recipe.steps.findIndex(
-      (step, index) =>
-        index > currentStage && currentTime >= step.timestamp
-    );
-
-    if (nextStageIndex !== -1) {
-      setCurrentStage(nextStageIndex);
-
-      // Scroll to the respective step
-      scrollRef.current?.scrollTo({
-        y: nextStageIndex * 60,
-        animated: true,
-      });
-    }
-  };
+  const windowWidth = Dimensions.get("window").width;
+  const videoHeight = windowWidth * 9 / 16;
 
   return (
     <View style={styles.container}>
       {/* YouTube Player */}
-      <View style={styles.videoContainer}>
-        {Platform.OS == "android" || Platform.OS == "ios" ? (
-          // Use WebView for Android and iOS
-          <WebView
-            source={{ uri: `https://www.youtube.com/embed/${recipe.videoId}?autoplay=1` }}
-            style={{ width: "100%", height: 200 }}
-            javaScriptEnabled={true}
-            allowsFullscreenVideo={true}
-            mediaPlaybackRequiresUserAction={false}
-            allowsInlineMediaPlayback={true}
-          />
-        ) : (
-          // Use YoutubePlayer for other platforms (e.g., web)
-          <YoutubePlayer
-            ref={playerRef}
-            height={'100%'}
-            videoId={recipe.videoId}
-            play={true}
-            onChangeState={(state) => {
-              if (state === "ended") setCurrentStage(0); // Reset to first stage when video ends
-            }}
-            onProgress={onProgress}
-          />
-        )}
+      <YoutubePlayer
+          ref={playerRef}
+          height={videoHeight}
+          videoId={recipe.videoId}
+          play={true}
+          onChangeState={(state) => {
+            if (state === "ended") setCurrentStage(0); // Reset to first stage when video ends
+          }}
+        />
         <View style={styles.stageControls}>
           <TouchableOpacity onPress={prevStage} style={styles.controlButton}>
             <Text style={styles.controlButtonText}>Previous</Text>
@@ -97,7 +101,6 @@ const RecipePage = () => {
             <Text style={styles.controlButtonText}>Next</Text>
           </TouchableOpacity>
         </View>
-      </View>
 
       {/* Scrollable Content */}
       <ScrollView ref={scrollRef} style={styles.scrollableContent}>
@@ -124,7 +127,7 @@ const RecipePage = () => {
                 key={index}
                 style={[
                   styles.listItem,
-                  index === currentStage && styles.highlightedStep, // Highlight current step
+                  index === currentStage && styles.highlightedStep,
                 ]}
               >
                 {index + 1}. {step.text}
@@ -145,12 +148,7 @@ const styles = StyleSheet.create({
   videoContainer: {
     flex: 1,
     backgroundColor: "#000",
-  },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
-    marginTop: 20,
-    fontSize: 16,
+    width: "100%",
   },
   stageControls: {
     flexDirection: "row",
