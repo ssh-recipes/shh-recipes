@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
-import { Modal } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { DieatryReqs, RecipeCard } from '../components';
 
-const filters = ['Halal', 'Gluten Free', 'Dairy Free', 'Vegan', 'Vegetarian', 'Keto', 'Paleo', 'Low Carb'];
 const sortFilters = ['Smart Filter', 'Frequently Cooked', 'Favourites', 'Available to cook']
 const primaryFontSize = 16
 const secondaryFontSize = 14
@@ -58,7 +56,7 @@ const recipes = [
     ingredients:[
       { name: 'spaghetti', quantity: '200g', available: true },
       { name: 'tomato', quantity: '100g', available: true },
-      { name: 'onions', quantity: '250g', available: false }
+      { name: 'onions', quantity: '250g', available: true }
     ],
     rating: 3,
     filters: [],
@@ -69,6 +67,8 @@ const recipes = [
 
 
 export default function Recipes() {
+  const [isDieatryFilterVisible, setDieatryFilterVisible] = useState(false);
+  const [selectedSortFilter, setSelectedSortFilter] = useState("");
   
   //Set Recipe Favourite
   const [favourite, setFavourite] = useState([]);
@@ -87,28 +87,23 @@ export default function Recipes() {
   };
 
   //Filters
-  const [selectedFilters, setSelectedFilters] = useState([]);
-  const toggleFilter = (filter) => {
-    if (selectedFilters.includes(filter)) {
-      setSelectedFilters(selectedFilters.filter((item) => item !== filter));
-    } else {
-      setSelectedFilters([...selectedFilters, filter]);
-    }
-  };
+  // const toggleFilter = (filter) => {
+  //   if (selectedFilters.includes(filter)) {
+  //     setSelectedFilters(selectedFilters.filter((item) => item !== filter));
+  //   } else {
+  //     setSelectedFilters([...selectedFilters, filter]);
+  //   }
+  // };
   
-  //Sort Filters
-  const [selectedSortFilter, setSelectedSortFilter] = useState("");
-  const toggleSortFilter = (filter) => setSelectedSortFilter(filter === selectedSortFilter ? null : filter);
-  
-  // Modal visibility state for the filters menu
-  const [isFilterModalVisible, setFilterModalVisible] = useState(false);
+  const toggleSortFilter = (filter) => 
+    setSelectedSortFilter(
+      filter === selectedSortFilter 
+      ? null 
+      : filter
+    );
 
   const openFilterModal = () => {
-    setFilterModalVisible(true);
-  };
-
-  const closeFilterModal = () => {
-    setFilterModalVisible(false);
+    setDieatryFilterVisible(true);
   };
 
 return (
@@ -148,143 +143,14 @@ return (
         </ScrollView>
       </View>
       {/* Filter Modal */}
-      <Modal
-        visible={isFilterModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={closeFilterModal}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Filters</Text>
-            <ScrollView style={styles.scrollViewModal}>
-              {filters.map((filter, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.filterButton,
-                    selectedFilters.includes(filter) && styles.filterButtonActive,
-                  ]}
-                  onPress={() => toggleFilter(filter)}
-                >
-                  <Text
-                    style={[
-                      styles.filterText,
-                      selectedFilters.includes(filter) && styles.filterTextActive,
-                    ]}
-                  >
-                    {filter}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-            <TouchableOpacity
-              style={styles.modalCloseButton}
-              onPress={closeFilterModal}
-            >
-              <Text style={styles.modalCloseButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+
+      <DieatryReqs isFilterVisible={isDieatryFilterVisible} setFilterVisible={setDieatryFilterVisible}/>
+
       {/* Main Container */}
       <View style={styles.mainContainer}>
         <ScrollView contentContainerStyle={styles.recipesContainer}>
           {recipes.map((recipe) => (
-            <View key={recipe.id} style={styles.recipeCard}>
-              {/* Recipe Image */}
-              <View style={styles.recipeImageContainer}>
-                <Image source={{ uri: recipe.image }} style={styles.recipeImage} />
-                {/*Is Favourite*/}
-                <TouchableOpacity
-                  onPress={() => toggleFavourite(recipe.id)}
-                  style={styles.favoriteIconContainer}
-                >
-                  <Icon
-                    name={favourite.includes(recipe.id) ? 'heart' : 'heart-o'}  // 'heart' for filled, 'heart-o' for empty
-                    size={30}
-                    color={favourite.includes(recipe.id) ? 'red' : 'gray'}
-                  />
-                </TouchableOpacity>
-                {recipe.ingredients.some(ingredient => !ingredient.available) && (
-                <Icon
-                  name="exclamation-circle"
-                  size={30}
-                  color="red"
-                  style={styles.exclamationIcon}
-                />
-              )}
-              </View>
-              {/* Recipe Title */}
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={styles.recipeText}>{recipe.title}</Text>
-              {/* Recipe Description */}
-              </View>
-              <Text style={styles.descriptionText}>{recipe.description}</Text>
-              {/* Filters and Stars Container */}
-              <View style={styles.filterAndStarsContainer}>
-                {/* Filters */}
-                <View style={styles.filtersContainer}>
-                  {recipe.filters && recipe.filters.length > 0 && recipe.filters.map((filter, index) => (
-                    <React.Fragment key={index}>
-                      <Text style={styles.filterBadge}>
-                        {filter}
-                      </Text>
-                      {index < recipe.filters.length - 1 && <View style={styles.circle} />}  {/* Add circle between filters */}
-                    </React.Fragment>
-                  ))}
-                </View>
-                {/* Stars Rating */}
-                <View style={styles.starContainer}>
-                  <Text style={styles.recipeText}>
-                    {[...Array(5)].map((_, index) => {
-                      if (index < Math.floor(recipe.rating)) {
-                        return (
-                          <Icon 
-                            key={index} 
-                            name="star" 
-                            size={20} 
-                            color="gold" 
-                          />
-                        );
-                      } else if (index < recipe.rating) {
-                        return (
-                          <Icon 
-                            key={index} 
-                            name="star-half-o" 
-                            size={20} 
-                            color="gold" 
-                          />
-                        );
-                      } else {
-                        return (
-                          <Icon 
-                            key={index} 
-                            name="star-o" 
-                            size={20} 
-                            color="gray" 
-                          />
-                        );
-                      }
-                    })}
-                  </Text>
-                </View>
-              </View>
-              {/* Ingredients Horizontal Scroll */}
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.ingredientsScroll}>
-                {recipe.ingredients.map((ingredient, index) => (
-                  <Text
-                    key={index}
-                    style={[
-                      styles.ingredientText,
-                      !ingredient.available && styles.missingIngredientText, // Apply red color for missing ingredients
-                    ]}
-                  >
-                    {ingredient.name} ({ingredient.quantity})
-                  </Text>
-                ))}
-              </ScrollView>
-            </View>
+            <RecipeCard key={recipe.id} recipe={recipe}/>
           ))}
         </ScrollView>
       </View>
