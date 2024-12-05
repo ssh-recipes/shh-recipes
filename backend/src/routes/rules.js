@@ -50,7 +50,6 @@ app.put('/:ruleId', async (c) => {
         }
 
         if (enabled) {
-            
             await db.query('INSERT INTO UserRule (user_id, rule_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE rule_id = rule_id', [userId,ruleId]);
         } else {
             

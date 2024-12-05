@@ -4,10 +4,26 @@ const app = new Hono();
 
 app.get('/', async (c) => {
     try {
+	const user = c.get("user");
         const { category, skip, take } = c.req.query();
 
         const [rows] = await db.query(
-            'SELECT * FROM Recipe'
+	    `
+SELECT DISTINCT r.*
+FROM Recipe r
+LEFT JOIN RecipeIngredient ri ON r.id = ri.recipe_id
+LEFT JOIN IngredientRule ir ON ri.ingredient_id = ir.ingredient_id
+LEFT JOIN UserRule ur ON ir.rule_id = ur.rule_id AND ur.user_id = ?
+WHERE r.id NOT IN (
+    SELECT r2.id
+    FROM Recipe r2
+    JOIN RecipeIngredient ri2 ON r2.id = ri2.recipe_id
+    JOIN IngredientRule ir2 ON ri2.ingredient_id = ir2.ingredient_id
+    JOIN UserRule ur2 ON ir2.rule_id = ur2.rule_id
+    WHERE ur2.user_id = ?
+);
+            `,
+	    [user.id, user.id]
         );
 
         return c.json({
