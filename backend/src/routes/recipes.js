@@ -98,6 +98,32 @@ app.post('/:recipeId/cooked', async (c) => {
     }
 });
 
+app.put('/:recipeId/favourite', async (c) => {
+    try {
+        const userId = c.get('user')['id'];
+        const recipeId = c.req.param('recipeId');
+        const { favourite } = await c.req.json();
 
+        if (typeof favourite !== 'boolean') {
+            return c.json({ success: false, error: 'Invalid favourite value' }, 400);
+        }
 
+        if (favourite) {
+            await db.query(
+                'INSERT INTO UserRecipe (user_id, recipe_id, favourite) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE favourite = 1',
+                [userId, recipeId]
+            );
+        } else {
+            await db.query(
+                'UPDATE UserRecipe SET favourite = 0 WHERE user_id = ? AND recipe_id = ?',
+                [userId, recipeId]
+            );
+        }
+
+        return c.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        return c.json({ success: false, error: 'Error updating favourite status' }, 500);
+    }
+});
 export default app;
