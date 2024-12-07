@@ -37,6 +37,7 @@ app.get('/', async (c) => {
                 description: recipe.description,
                 instructions: recipe.instructions,
                 avg_rating: recipe.avg_rating,
+                ingredients: recipe.ingredients,
             })),
         });
     } catch (err) {
@@ -50,11 +51,11 @@ app.get('/:recipeId', async (c) => {
         const recipeId = c.req.param('recipeId');
         const [rows] = await db.query(
                 `
-            SELECT r.*, AVG(ur.rating) AS avg_rating
+            SELECT r.*, ur.favourite, ur.last_cooked, AVG(ur.rating) AS avg_rating
              FROM Recipe r
              LEFT JOIN UserRecipe ur ON r.id = ur.recipe_id
              WHERE r.id = ?
-             GROUP BY r.id;`,
+             GROUP BY r.id, ur.favourite, ur.last_cooked;`,
             [recipeId]
                 );
         if (rows.length === 0) {
@@ -76,11 +77,11 @@ app.get('/:recipeId', async (c) => {
                 video: recipe.video,
                 description: recipe.description,
                 instructions: recipe.instructions,
-                ingredients,
+                avg_rating: recipe.avg_rating,
+                ingredients: ingredients,
                 times_cooked: recipe.times_cooked,
                 favourite: recipe.favourite,
                 last_cooked: recipe.last_cooked,
-                avg_rating: recipe.avg_rating,
             },
         });
     } catch (err) {
