@@ -7,9 +7,8 @@ app.get('/', async (c) => {
         const user = c.get("user");
         const { category, skip, take } = c.req.query();
 
-        const [rows] = await db.query(
-                `
-            SELECT DISTINCT r.*, AVG(urr.rating) AS avg_rating 
+        const [rows] = await db.query(`
+            SELECT DISTINCT r.*, AVG(urr.rating) AS avg_rating, urr.favourite, urr.last_cooked, urr.recipe_id
                 FROM Recipe r
             LEFT JOIN RecipeIngredient ri ON r.id = ri.recipe_id
             LEFT JOIN IngredientRule ir ON ri.ingredient_id = ir.ingredient_id
@@ -17,16 +16,15 @@ app.get('/', async (c) => {
             LEFT JOIN UserRecipe urr ON r.id = urr.recipe_id
                 WHERE r.id NOT IN (
                     SELECT r2.id
-                        FROM Recipe r2
-                    JOIN RecipeIngredient ri2 ON r2.id = ri2.recipe_id
-                    JOIN IngredientRule ir2 ON ri2.ingredient_id = ir2.ingredient_id
-                    JOIN UserRule ur2 ON ir2.rule_id = ur2.rule_id
-                        WHERE ur2.user_id = ?
-                                  )
-            GROUP BY r.id;`,
-            [user.id, user.id]
-                );
-
+                         FROM Recipe r2
+                JOIN RecipeIngredient ri2 ON r2.id = ri2.recipe_id
+                JOIN IngredientRule ir2 ON ri2.ingredient_id = ir2.ingredient_id
+                JOIN UserRule ur2 ON ir2.rule_id = ur2.rule_id
+                    WHERE ur2.user_id = ?)
+            GROUP BY r.id, urr.favourite, urr.last_cooked, urr.recipe_id;`,
+             [user.id, user.id]
+                 );
+        
         return c.json({
             success: true,
             data: rows.map(recipe => ({
@@ -38,6 +36,9 @@ app.get('/', async (c) => {
                 instructions: recipe.instructions,
                 avg_rating: recipe.avg_rating,
                 ingredients: recipe.ingredients,
+                times_cooked: recipe.times_cooked,
+                favourite: recipe.favourite,
+                last_cooked: recipe.last_cooked,
             })),
         });
     } catch (err) {
