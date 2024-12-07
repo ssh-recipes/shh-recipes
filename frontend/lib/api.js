@@ -79,7 +79,7 @@ export const getRecipes = async (category, skip, take) => {
 		"id": "cheese_omellete",
 		"name": "Cheese Omelette",
 		"icon": "icons/cheese_omellette.png", // the api will host static assets, so icon would be BASE_URL/static/icons/cheese_omellete.png for example
-		"video": "pfXVx9xYXlE", // youtube video id, for potential embed? https://youtube.com/embed/pfXVx9xYXlE for example
+		"video": "videos/cheese_omellete_vid.mp4",
 		"description": "A delicious cheese omelette.",
 		"instructions": "Whisk eggs and add cheese."
 		"avg_rating": 9, // 0-10, divide by 2 to get the "stars", e.g. 9 means 4.5/5
@@ -107,7 +107,7 @@ export const getRecipes = async (category, skip, take) => {
 		"id": "carrot_salad",
 		"name": "Carrot Salad",
 		"icon": "icons/carrot_salad.png",
-		"video": "48apTozJfo4",
+		"video": "videos/carrot_salad_video.mp4",
 		"description": "A healthy carrot salad.",
 		"instructions": "Grate carrots and add dressing."
 		"avg_rating": 6,
@@ -136,7 +136,7 @@ export const getRecipe = async (id) => {
 	    "id": "cheese_omellete",
 	    "name": "Cheese Omelette",
 	    "icon": "cheese_omellette",
-	    "video": "pfXVx9xYXlE",
+	    "video": "video/cheese_omellete_video.mp4",
 	    "description": "A delicious cheese omelette.",
 	    "instructions": "Whisk eggs and add cheese."
 	    "avg_rating": 9,
