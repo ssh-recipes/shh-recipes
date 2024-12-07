@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { Home, Groceries, Recipes } from './screens/index';
+import { Home, Groceries, Recipes, RecipePage } from './screens/index';
 
 const Drawer = createDrawerNavigator();
 
@@ -27,6 +27,7 @@ export default function App() {
       >
         <Drawer.Screen name="Home" component={Home} />
         <Drawer.Screen name="Recipes" component={Recipes} />
+        <Drawer.Screen name="RecipePage" component={RecipePage} />
         <Drawer.Screen name="Groceries" component={Groceries} />
       </Drawer.Navigator>
     </NavigationContainer>
