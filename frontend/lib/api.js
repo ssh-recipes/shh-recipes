@@ -82,6 +82,7 @@ export const getRecipes = async (category, skip, take) => {
 		"video": "pfXVx9xYXlE", // youtube video id, for potential embed? https://youtube.com/embed/pfXVx9xYXlE for example
 		"description": "A delicious cheese omelette.",
 		"instructions": "Whisk eggs and add cheese."
+		"avg_rating": 9, // 0-10, divide by 2 to get the "stars", e.g. 9 means 4.5/5
 		"ingredients": [
 		    {
 			"id": "egg",
@@ -109,6 +110,7 @@ export const getRecipes = async (category, skip, take) => {
 		"video": "48apTozJfo4",
 		"description": "A healthy carrot salad.",
 		"instructions": "Grate carrots and add dressing."
+		"avg_rating": 6,
 		"ingredients": [
 		    {
 			"id": "carrot",
@@ -137,18 +139,21 @@ export const getRecipe = async (id) => {
 	    "video": "pfXVx9xYXlE",
 	    "description": "A delicious cheese omelette.",
 	    "instructions": "Whisk eggs and add cheese."
+	    "avg_rating": 9,
 	    "ingredients": [
 		{
 		    "id": "egg",
 		    "name": "Egg",
 		    "quantity": 2,
-		    "unit": "quantity"
+		    "unit": "quantity",
+		    "fulfilled": true
 		},
 		{
 		    "id": "milk",
 		    "name": "Milk",
 		    "quantity": 100,
-		    "unit": "ml"
+		    "unit": "ml",
+		    "fulfilled": true
 		}
 	    ],
 	    "times_cooked": 25000,
