@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
-import { DieatryReqs, RecipeCard } from '../components';
+import { DietryReqs, RecipeCard } from '../components';
 
 const sortFilters = ['Recommended', 'Recent', 'Favourites']
-const primaryFontSize = 16
-const secondaryFontSize = 14
-// Example recipes, will use fetch from backend
 
 const recipes = [
   { id: 1, 
@@ -72,7 +69,7 @@ const recipes = [
 
 
 export default function Recipes({ navigation }) {
-  const [isDieatryFilterVisible, setDieatryFilterVisible] = useState(false);
+  const [isDietryFilterVisible, setDietryFilterVisible] = useState(false);
   const [selectedSortFilter, setSelectedSortFilter] = useState("Recommended");
   
   const selectSortFilter = (filter) => 
@@ -84,7 +81,7 @@ export default function Recipes({ navigation }) {
     // );
 
   const openFilterModal = () => {
-    setDieatryFilterVisible(true);
+    setDietryFilterVisible(true);
   };
 
 return (
@@ -96,7 +93,7 @@ return (
         contentContainerStyle={styles.scrollContainer}
       >
       <TouchableOpacity style={styles.filterButton} onPress={openFilterModal}>
-        <Text style={styles.filterText}>Dieatry Filters</Text>
+        <Text style={styles.filterText}>Dietry Filters</Text>
       </TouchableOpacity>
       <View style={styles.separator}/>
       {sortFilters.map((filter, index) => (
@@ -121,7 +118,7 @@ return (
       </ScrollView>
     </View>
 
-    <DieatryReqs isFilterVisible={isDieatryFilterVisible} setFilterVisible={setDieatryFilterVisible}/>
+    <DietryReqs isFilterVisible={isDietryFilterVisible} setFilterVisible={setDietryFilterVisible}/>
 
     <View style={styles.mainContainer}>
       <ScrollView contentContainerStyle={styles.recipesContainer}>

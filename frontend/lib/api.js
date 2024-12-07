@@ -39,7 +39,7 @@ export const getRules = async () => {
 			"description": "Does not contain milk or milk products, including cheese, butter, or any dairy derivatives."
 				},
 				{
-			"id": "hala",
+			"id": "halal",
 			"name": "Halal",
 			"description": "Adheres to Islamic dietary laws, including the prohibition of pork, alcohol, and non-Halal-certified meat."
 				}
