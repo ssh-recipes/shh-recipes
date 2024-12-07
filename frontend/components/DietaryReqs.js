@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-nati
 import { Modal } from 'react-native';
 import { getRules, getUser } from '../lib/api';
 
-export default function DietryReqs({isFilterVisible, setFilterVisible}) {
+export default function DietaryReqs({isFilterVisible, setFilterVisible}) {
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [filters, setFilters] = useState([]);
 
@@ -28,14 +28,14 @@ export default function DietryReqs({isFilterVisible, setFilterVisible}) {
       if (fUser && fUser.success) {
         setSelectedFilters(fUser.data.rules);
       } else {
-        console.error("Error: Fetch rules in DietryReqs.")
+        console.error("Error: Fetch rules in DietaryReqs.")
         setSelectedFilters([]);
       }
   
       if (fRules && fRules.success) {
         setFilters(fRules.data);
       } else {
-        console.error("Error: Fetch recipe in DietryReqs.")
+        console.error("Error: Fetch recipe in DietaryReqs.")
         setFilters([]);
       }
     } catch (error) {

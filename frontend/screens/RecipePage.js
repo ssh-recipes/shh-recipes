@@ -8,7 +8,6 @@ const timeOffset = 300 //300 miliseconds to fix errors with current stage
 
 export default function RecipePage({ route }) {
   const { recipe } = route.params;
-  // const [recipe, setRecipe] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStage, setCurrentStage] = useState(-1);
   const [currentTime, setCurrentTime] = useState(0);
