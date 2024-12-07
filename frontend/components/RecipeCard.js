@@ -1,34 +1,10 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { getRecipe } from "../lib/api";
 
 const primaryFontSize = 16;
 const secondaryFontSize = 14;
-
-const recipeId = {
-  title: "Easy chocolate fudge cake",
-  video: "https://0c18e53b.media.greenvideo.io/0c18e53b610964fac175fe0e757adc30557e79b7/878e15a9abb541b09ff0df43c2b45f79bd5d4c9c/MEDIA/v1/HD/media.mp4",
-  ingredients: [
-    "150ml sunflower oil",
-    "175g self-raising flour",
-    "2 tbsp cocoa powder",
-    "1 tsp bicarbonate of soda",
-    "150g caster sugar",
-    "2 tbsp golden syrup",
-    "2 large eggs",
-    "100g unsalted butter",
-    "225g icing sugar",
-    "40g cocoa powder",
-  ],
-  steps: [
-    { text: "Heat the oven to 180C/160C fan/gas 4. Oil and line the base of two 18cm sandwich tins. Sieve the flour, cocoa powder and bicarbonate of soda into a bowl. Add the caster sugar and mix well.", timestamp: 8 },
-    { text: "Make a well in the centre and add the golden syrup, eggs, sunflower oil and milk. Beat well with an electric whisk until smooth.", timestamp: 22 },
-    { text: "Pour the mixture into the two tins and bake for 25-30 mins until risen and firm to the touch. Remove from oven, leave to cool for 10 mins before turning out onto a cooling rack.", timestamp: 36 },
-    { text: "To make the icing, beat the unsalted butter in a bowl until soft. Gradually sieve and beat in the icing sugar and cocoa powder, then add enough of the milk to make the icing fluffy and spreadable.", timestamp: 45 },
-    { text: "Add the egg mixture to the pasta and toss quickly to create a creamy sauce.", timestamp: 55 },
-    { text: "Sandwich the two cakes together with the butter icing and cover the sides and the top of the cake with more icing.", timestamp: 65 },
-  ],
-};
 
 export default function RecipeCard({navigation, recipe}) {
   const [isfavourite, setFavourite] = useState(recipe.isFavourite);
@@ -37,10 +13,28 @@ export default function RecipeCard({navigation, recipe}) {
     setFavourite(!isfavourite);
   };
 
+  const fetchDataNavigate = async () => {
+    try {
+      const fRecipe = await getRecipe(recipe.id);
+  
+      if (fRecipe && fRecipe.success) {
+        navigation.navigate('RecipePage', { recipe: fRecipe.data })
+      } else {
+        console.error("Error: Fetch recipe in RecipePage.")
+        //navigate to error page
+        return null
+      }
+    } catch (error) {
+      console.error("Error fetching recipe:", error);
+      //navigate to error page
+      return null;
+    }
+  }
+
   return (
     <View style={styles.recipeCard}>
       <View style={styles.recipeImageContainer}>
-        <TouchableOpacity onPress={() => navigation.navigate('RecipePage', { recipeId: recipeId })}
+        <TouchableOpacity onPress={() => fetchDataNavigate()}
           style={styles.imageButton}
         >
           <Image source={{ uri: recipe.image }} style={styles.recipeImage} />

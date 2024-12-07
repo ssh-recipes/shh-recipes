@@ -3,7 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { DieatryReqs, RecipeCard } from '../components';
 
-const sortFilters = ['Smart Filter', 'Frequently Cooked', 'Favourites', 'Available to cook']
+const sortFilters = ['Recommended', 'Recent', 'Favourites']
 const primaryFontSize = 16
 const secondaryFontSize = 14
 // Example recipes, will use fetch from backend
@@ -73,7 +73,7 @@ const recipes = [
 
 export default function Recipes({ navigation }) {
   const [isDieatryFilterVisible, setDieatryFilterVisible] = useState(false);
-  const [selectedSortFilter, setSelectedSortFilter] = useState("");
+  const [selectedSortFilter, setSelectedSortFilter] = useState("Recommended");
   
   //Set Recipe Favourite
   const [favourite, setFavourite] = useState([]);
@@ -91,61 +91,63 @@ export default function Recipes({ navigation }) {
     return recipe.ingredients.every(ingredient => ingredient.available);
   };
   
-  const toggleSortFilter = (filter) => 
-    setSelectedSortFilter(
-      filter === selectedSortFilter 
-      ? null 
-      : filter
-    );
+  const selectSortFilter = (filter) => 
+    setSelectedSortFilter(filter)
+    // setSelectedSortFilter(
+    //   filter === selectedSortFilter 
+    //   ? null 
+    //   : filter
+    // );
 
   const openFilterModal = () => {
     setDieatryFilterVisible(true);
   };
 
 return (
-    <View style={styles.container}>
-      <View style={styles.selectionView}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContainer}
+  <View style={styles.container}>
+    <View style={styles.selectionView}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContainer}
+      >
+      <TouchableOpacity style={styles.filterButton} onPress={openFilterModal}>
+        <Text style={styles.filterText}>Dieatry Filters</Text>
+      </TouchableOpacity>
+      <View style={styles.separator}/>
+      {sortFilters.map((filter, index) => (
+        <TouchableOpacity
+          key={index}
+          style={[
+            styles.filterButton,
+            selectedSortFilter === filter && styles.filterButtonActive, // Apply active style based on selected filter
+          ]}
+          onPress={() => selectSortFilter(filter)}
         >
-        <TouchableOpacity style={styles.filterButton} onPress={openFilterModal}>
-          <Text style={styles.filterText}>Filters</Text>
-        </TouchableOpacity>
-        {sortFilters.map((filter, index) => (
-          <TouchableOpacity
-            key={index}
+          <Text
             style={[
-              styles.filterButton,
-              selectedSortFilter === filter && styles.filterButtonActive, // Apply active style based on selected filter
+              styles.filterText,
+              selectedSortFilter === filter && styles.filterTextActive, // Apply active text style based on selected filter
             ]}
-            onPress={() => toggleSortFilter(filter)}
           >
-            <Text
-              style={[
-                styles.filterText,
-                selectedSortFilter === filter && styles.filterTextActive, // Apply active text style based on selected filter
-              ]}
-            >
-              {filter}
-            </Text>
-          </TouchableOpacity>
-        ))}
-        </ScrollView>
-      </View>
-
-      <DieatryReqs isFilterVisible={isDieatryFilterVisible} setFilterVisible={setDieatryFilterVisible}/>
-
-      <View style={styles.mainContainer}>
-        <ScrollView contentContainerStyle={styles.recipesContainer}>
-          {recipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} navigation={navigation}/>
-          ))}
-        </ScrollView>
-      </View>
-      <StatusBar style="auto" />
+            {filter}
+          </Text>
+        </TouchableOpacity>
+      ))}
+      </ScrollView>
     </View>
+
+    <DieatryReqs isFilterVisible={isDieatryFilterVisible} setFilterVisible={setDieatryFilterVisible}/>
+
+    <View style={styles.mainContainer}>
+      <ScrollView contentContainerStyle={styles.recipesContainer}>
+        {recipes.map((recipe) => (
+          <RecipeCard key={recipe.id} recipe={recipe} navigation={navigation}/>
+        ))}
+      </ScrollView>
+    </View>
+    <StatusBar style="auto" />
+  </View>
   );
 }
 
@@ -157,6 +159,14 @@ const styles = StyleSheet.create({
   },
   mainContainer: {
     flex: 1,
+  },
+  separator: {
+    height: 25,
+    width: 2,
+    backgroundColor: 'gray',
+
+    marginLeft: 10,
+    marginBottom: 10,
   },
 
   // Filter Section
