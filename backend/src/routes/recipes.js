@@ -9,25 +9,51 @@ app.get('/', async (c) => {
 
         const [rows] = await db.query(`
             SELECT DISTINCT r.*, AVG(urr.rating) AS avg_rating, urr.favourite, urr.last_cooked, urr.recipe_id
-                FROM Recipe r
+            FROM Recipe r
             LEFT JOIN RecipeIngredient ri ON r.id = ri.recipe_id
             LEFT JOIN IngredientRule ir ON ri.ingredient_id = ir.ingredient_id
             LEFT JOIN UserRule ur ON ir.rule_id = ur.rule_id AND ur.user_id = ?
             LEFT JOIN UserRecipe urr ON r.id = urr.recipe_id
-                WHERE r.id NOT IN (
-                    SELECT r2.id
-                         FROM Recipe r2
+            WHERE r.id NOT IN (
+                SELECT r2.id
+                FROM Recipe r2
                 JOIN RecipeIngredient ri2 ON r2.id = ri2.recipe_id
                 JOIN IngredientRule ir2 ON ri2.ingredient_id = ir2.ingredient_id
                 JOIN UserRule ur2 ON ir2.rule_id = ur2.rule_id
-                    WHERE ur2.user_id = ?)
-            GROUP BY r.id, urr.favourite, urr.last_cooked, urr.recipe_id;`,
-             [user.id, user.id]
-                 );
-        
+                WHERE ur2.user_id = ?
+            )
+            GROUP BY r.id, urr.favourite, urr.last_cooked, urr.recipe_id;
+        `, [user.id, user.id]);
+
+        const recipesWithDetails = await Promise.all(rows.map(async (recipe) => {
+            const [ingredients] = await db.query(
+                'SELECT i.id, i.name, ri.quantity, ri.unit FROM Ingredient i, RecipeIngredient ri WHERE ri.ingredient_id = i.id AND ri.recipe_id = ?',
+                [recipe.id]
+            );
+
+            const [rules] = await db.query(
+                'SELECT DISTINCT ir.rule_id FROM IngredientRule ir , recipeingredient ri WHERE ri.recipe_id = ? AND ir.ingredient_id = ri.ingredient_id',
+                [recipe.id]
+            );
+
+            console.log(`Recipe ID: ${recipe.id}, Rules:`, rules);
+
+            return {
+                ...recipe,
+                ingredients: ingredients.map(ingredient => ({
+                    id: ingredient.id,
+                    name: ingredient.name,
+                    quantity: ingredient.quantity,
+                    unit: ingredient.unit,
+                    fulfilled: false
+                })),
+                rules: rules.map(rule => rule.rule_id),
+            };
+        }));
+
         return c.json({
             success: true,
-            data: rows.map(recipe => ({
+            data: recipesWithDetails.map(recipe => ({
                 id: recipe.id,
                 name: recipe.name,
                 icon: recipe.icon,
@@ -35,6 +61,7 @@ app.get('/', async (c) => {
                 description: recipe.description,
                 instructions: recipe.instructions,
                 avg_rating: recipe.avg_rating,
+                rules: recipe.rules,
                 ingredients: recipe.ingredients,
                 times_cooked: recipe.times_cooked,
                 favourite: recipe.favourite,
