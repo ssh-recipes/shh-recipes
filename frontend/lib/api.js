@@ -87,13 +87,15 @@ export const getRecipes = async (category, skip, take) => {
 			"id": "egg",
 			"name": "Egg",
 			"quantity": 2,
-			"unit": "quantity"
+			"unit": "quantity",
+			"fulfilled": true
 		    },
 		    {
 			"id": "milk",
 			"name": "Milk",
 			"quantity": 100,
-			"unit": "ml"
+			"unit": "ml",
+			"fulfilled": true
 		    }
 		],
 		"times_cooked": 25000, // this is the total amount cooked, not per user
@@ -113,6 +115,7 @@ export const getRecipes = async (category, skip, take) => {
 			"name": "Carrot",
 			"quantity": 3,
 			"unit": "quantity"
+			"fulfilled": true
 		    }
 		],
 		"times_cooked": 50000,
