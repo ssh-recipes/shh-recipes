@@ -75,22 +75,6 @@ export default function Recipes({ navigation }) {
   const [isDieatryFilterVisible, setDieatryFilterVisible] = useState(false);
   const [selectedSortFilter, setSelectedSortFilter] = useState("Recommended");
   
-  //Set Recipe Favourite
-  const [favourite, setFavourite] = useState([]);
-  const toggleFavourite = (recipeId) => {
-    if(favourite.includes(recipeId)){
-      setFavourite(favourite.filter((item) => item !== recipeId));
-    }
-    else{
-      setFavourite([...favourite, recipeId]);
-    }
-  };
-  
-  // All ingredients available
-  const allIngredientsAvailable = (recipe) => {
-    return recipe.ingredients.every(ingredient => ingredient.available);
-  };
-  
   const selectSortFilter = (filter) => 
     setSelectedSortFilter(filter)
     // setSelectedSortFilter(
@@ -152,7 +136,6 @@ return (
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -212,160 +195,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginHorizontal: 10,
   },
-  recipeCard: {
-    backgroundColor: '#148B4E',
-    marginBottom: 10,
-    borderRadius: 10,
-    justifyContent: 'flex-start',
-    shadowColor: '#000',
-    shadowOpacity: 0.5,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 4, // Android shadows
-  },
-  recipeImageContainer: {
-    position: 'relative',
-    width: '100%',
-    height: undefined,
-    aspectRatio: 16 / 9, // Maintain aspect ratio
-  },
-  recipeImage: {
-    width: '100%',
-    height: '100%',
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-  },
-  favoriteIconContainer: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 1,
-  },
-  exclamationIcon: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    zIndex: 1,
-  },
-  filterAndStarsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 5,
-  },
-  recipeText: {
-    fontSize: primaryFontSize,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'left',
-    padding: 0,
-    marginLeft: 10,
-    marginTop: 5,
-    letterSpacing: 1,
-    textTransform: 'capitalize',
-  },
-  descriptionText: {
-    fontSize: secondaryFontSize,
-    marginLeft: 10,
-    color: '#fff',
-  },
-  starContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingRight: 5,
-  },
-
-  // Filter Badges (Applied to Recipe Filters)
-  filtersContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    marginTop: 5,
-    marginLeft: 5,
-  },
-  filterBadge: {
-    backgroundColor: '#148B4E',
-    color: '#fff',
-    borderRadius: 15,
-    fontSize: secondaryFontSize,
-    fontWeight: 'bold',
-  },
-  circle: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    alignSelf: 'center',
-    marginHorizontal: 5,
-  },
   ingredientsScroll: {
     paddingVertical : 5,
-  },
-  ingredientText: {
-    fontSize: secondaryFontSize,
-    color: '#fff',
-    marginLeft: 10,
-    fontStyle: 'italic',
-  },
-  missingIngredientText: {
-    color: 'red',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: 300,
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  scrollViewModal: {
-    maxHeight: 300,
-    width: '100%',
-  },
-  modalCloseButton: {
-    backgroundColor: '#148B4E',
-    borderRadius: 25,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    marginTop: 20,
-    width: '80%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    elevation: 5,
-  },
-  modalCloseButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
-  },
-  available: {
-    color: 'green',
-    fontWeight: 'bold',
-  },
-  missing: {
-    color: 'red',
-    fontWeight: 'bold',
-  },
-
-  contentText: {
-    marginTop: 20,
-    fontSize: 16,
-    textAlign: 'center',
   },
 });
