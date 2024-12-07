@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { DieatryReqs, RecipeCard } from '../components';
 
 const sortFilters = ['Smart Filter', 'Frequently Cooked', 'Favourites', 'Available to cook']
@@ -10,16 +10,21 @@ const secondaryFontSize = 14
 
 const recipes = [
   { id: 1, 
-    title: "Chicken & Spinach Gnocchi (Serves 2-3)", 
-    image: "https://ichef.bbci.co.uk/food/ic/food_16x9_1600/recipes/chicken_spinach_gnocchi_16914_16x9.jpg",
-    description: "a comforting, savory dish with tender chicken",
+    title: "Chocolate Chip Cookies", 
+    image: "https://imagesvc.meredithcorp.io/v3/mm/image?url=https%3A%2F%2Fstatic.onecms.io%2Fwp-content%2Fuploads%2Fsites%2F43%2F2022%2F03%2F08%2F10813-best-chocolate-chip-cookies-mfs-step-7-148.jpg&q=60&c=sc&poi=auto&orient=true&h=512",
+    description: "with a Hint of Cinnamon",
     videoUrl: "",
     ingredients:[
-      { name: 'Chicken', quantity: '200g', available: true },
-      { name: 'Spinach', quantity: '100g', available: true },
-      { name: 'Gnocchi', quantity: '250g', available: false }
+      { name: 'Sunflower oil', quantity: '150ml', available: true },
+      { name: 'Self-raising flour', quantity: '175g', available: false },
+      { name: 'Bicarbonate of soda', quantity: '2 tbsp', available: true },
+      { name: 'Caster sugar', quantity: '150g', available: false },
+      { name: 'Large egg', quantity: '2', available: true },
+      { name: 'Unsalted butter', quantity: '175g', available: true },
+      { name: 'Icing sugar', quantity: '225g', available: false },
+      { name: 'Cocoa powder', quantity: '40g', available: false },
     ],
-    rating: 1,
+    rating: 4.5,
     filters: ['Halal', 'Gluten Free'],
     isFavourite: false,
     lastCooked: "2024-11-20"
@@ -66,7 +71,7 @@ const recipes = [
 ];
 
 
-export default function Recipes() {
+export default function Recipes({ navigation }) {
   const [isDieatryFilterVisible, setDieatryFilterVisible] = useState(false);
   const [selectedSortFilter, setSelectedSortFilter] = useState("");
   
@@ -85,15 +90,6 @@ export default function Recipes() {
   const allIngredientsAvailable = (recipe) => {
     return recipe.ingredients.every(ingredient => ingredient.available);
   };
-
-  //Filters
-  // const toggleFilter = (filter) => {
-  //   if (selectedFilters.includes(filter)) {
-  //     setSelectedFilters(selectedFilters.filter((item) => item !== filter));
-  //   } else {
-  //     setSelectedFilters([...selectedFilters, filter]);
-  //   }
-  // };
   
   const toggleSortFilter = (filter) => 
     setSelectedSortFilter(
@@ -108,19 +104,15 @@ export default function Recipes() {
 
 return (
     <View style={styles.container}>
-      {/* Filters and Button Container */}
       <View style={styles.selectionView}>
-        {/* Sort Filters */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.scrollContainer}
         >
-        {/* Filter Button */}
         <TouchableOpacity style={styles.filterButton} onPress={openFilterModal}>
           <Text style={styles.filterText}>Filters</Text>
         </TouchableOpacity>
-        {/* Filter Button */}
         {sortFilters.map((filter, index) => (
           <TouchableOpacity
             key={index}
@@ -128,7 +120,7 @@ return (
               styles.filterButton,
               selectedSortFilter === filter && styles.filterButtonActive, // Apply active style based on selected filter
             ]}
-            onPress={() => toggleSortFilter(filter)} // Toggle selection on press
+            onPress={() => toggleSortFilter(filter)}
           >
             <Text
               style={[
@@ -142,15 +134,13 @@ return (
         ))}
         </ScrollView>
       </View>
-      {/* Filter Modal */}
 
       <DieatryReqs isFilterVisible={isDieatryFilterVisible} setFilterVisible={setDieatryFilterVisible}/>
 
-      {/* Main Container */}
       <View style={styles.mainContainer}>
         <ScrollView contentContainerStyle={styles.recipesContainer}>
           {recipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe}/>
+            <RecipeCard key={recipe.id} recipe={recipe} navigation={navigation}/>
           ))}
         </ScrollView>
       </View>
@@ -160,7 +150,7 @@ return (
 }
 
 const styles = StyleSheet.create({
-  // Main container styles
+
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -194,7 +184,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
-    elevation: 4, // Android shadows
+    elevation: 4,
     alignSelf: 'flex-start',
   },
   filterButtonActive: {
@@ -208,8 +198,6 @@ const styles = StyleSheet.create({
   filterTextActive: {
     color: '#fff',
   },
-
-  // Recipe Card Section
   recipesContainer: {
     marginTop: 5,
     marginHorizontal: 10,
@@ -233,7 +221,7 @@ const styles = StyleSheet.create({
   },
   recipeImage: {
     width: '100%',
-    height: '100%', // Full container size
+    height: '100%',
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },
@@ -241,7 +229,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
-    zIndex: 1, // Ensure it's above the image
+    zIndex: 1,
   },
   exclamationIcon: {
     position: 'absolute',
@@ -250,13 +238,11 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   filterAndStarsContainer: {
-    flexDirection: 'row',  // Align filters and stars horizontally
-    justifyContent: 'space-between',  // Space out filters and stars
-    alignItems: 'center',  // Vertically center the content
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 5,
   },
-
-  // Recipe Texts
   recipeText: {
     fontSize: primaryFontSize,
     fontWeight: 'bold',
@@ -298,13 +284,11 @@ const styles = StyleSheet.create({
   circle: {
     width: 16,
     height: 16,
-    borderRadius: 8,  // Makes it circular
+    borderRadius: 8,
     backgroundColor: '#fff',
     alignSelf: 'center',
     marginHorizontal: 5,
   },
-
-  // Ingredients Section
   ingredientsScroll: {
     paddingVertical : 5,
   },
@@ -315,14 +299,13 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   missingIngredientText: {
-    color: 'red', // Font color for missing ingredients
+    color: 'red',
   },
-  // Modal Styles
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     width: 300,
@@ -361,8 +344,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
   },
-
-  // Content Styles
   available: {
     color: 'green',
     fontWeight: 'bold',

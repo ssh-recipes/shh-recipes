@@ -1,48 +1,115 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from "react-native";
-import YoutubePlayer from "react-native-youtube-iframe";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Platform, Alert } from "react-native";
+import { Audio, Video, ResizeMode } from "expo-av";
 
-const recipe = {
-  title: "Spaghetti Carbonara",
-  videoId: "3dBEz3kwzi0",
-  ingredients: [
-    "200g Spaghetti",
-    "100g Pancetta",
-    "2 large eggs",
-    "50g Parmesan cheese",
-    "Salt and pepper to taste",
-  ],
-  steps: [
-    { text: "Cook the spaghetti according to the package instructions.", timestamp: 0 },
-    { text: "While the pasta is cooking, fry the pancetta until crispy.", timestamp: 50 },
-    { text: "In a bowl, whisk the eggs and grated Parmesan together.", timestamp: 100 },
-    { text: "Once the spaghetti is done, drain it and mix it with the pancetta.", timestamp: 150 },
-    { text: "Add the egg mixture to the pasta and toss quickly to create a creamy sauce.", timestamp: 200 },
-    { text: "Season with salt and pepper to taste and serve.", timestamp: 350 },
-  ],
-};
+const windowWidth = Dimensions.get("window").width;
+const videoHeight = windowWidth * 9 / 16;
+const timeOffset = 300 //300 miliseconds to fix errors with current stage
 
-const RecipePage = () => {
-  const [currentStage, setCurrentStage] = useState(0);
+export default function RecipePage({ route }) {
+  const { recipeId } = route.params;
+  const recipe = recipeId;
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentStage, setCurrentStage] = useState(-1);
   const [currentTime, setCurrentTime] = useState(0);
+  const [offsetAboveSteps, setOffsetAboveSteps] = useState(0);
+
   const scrollRef = useRef(null);
-  const playerRef = useRef(null);
-  const intervalRef = useRef(null); // To keep track of the interval
+  const videoRef = useRef(null);
+  const elementPositions = useRef([]);
 
   useEffect(() => {
-    // Start the interval when the component mounts
-    intervalRef.current = setInterval(async () => {
-      if (playerRef.current) {
-        const time = await playerRef.current.getCurrentTime();
-        setCurrentTime(time); // Update current time
+    const enableAudio = async () => {
+      try {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          interruptionModeIOS: 1, // DoNotMix
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+          interruptionModeAndroid: 1, // DoNotMix
+          shouldDuckAndroid: true,
+        });
+      } catch (error) {
+        console.error(error);
       }
-    }, 500); // Poll every 500ms
-
-    return () => {
-      // Clear the interval when the component unmounts
-      clearInterval(intervalRef.current);
     };
+    enableAudio();
   }, []);
+
+  const handlePlaybackStatusUpdate = (status) => {
+    setIsPlaying(status.isPlaying);
+
+    if (status.isLoaded) {
+      setCurrentTime(status.positionMillis / 1000); // Convert to seconds
+    }
+  };
+
+  const showAlert = async (question, onYes = undefined, onNo = undefined) => {
+    if (Platform.OS === 'web') {
+      const responce = confirm(question);
+      if (responce) {
+        if (onYes) {
+          onYes();
+        }
+      } else {
+        if (onNo) {
+          onNo();
+        }
+      }
+    } else {
+      Alert.alert(
+        question,
+        null,
+        [
+          {
+            text: "Yes",
+            onPress: () => { 
+              if (onYes) {
+                onYes();
+              }
+            }
+          },
+          {
+            text: "No",
+            onPress: () => { 
+              if (onNo) {
+                onNo();
+              }
+            }
+          },
+        ],
+        { cancelable: false }
+      );
+    }
+  }
+
+  const showMessage = (message) => {
+    if (Platform.OS === 'web') {
+      alert(message);
+    } else {
+      Alert.alert(
+        message,
+        null,
+        [
+          {
+            text: 'Close',
+          },
+        ],
+        { cancelable: false }
+      );
+    }
+  }
+
+  const handlePlayPause = async () => {
+    if (videoRef.current && isPlaying) {
+      await videoRef.current.playAsync();
+    }
+  };
+
+  useEffect(() => {
+    handlePlayPause();
+  }, [isPlaying]);
 
   useEffect(() => {
     const nextStageIndex = recipe.steps.findIndex(
@@ -51,65 +118,87 @@ const RecipePage = () => {
         currentTime < (recipe.steps[index + 1]?.timestamp || Infinity)
     );
 
-    if (nextStageIndex !== -1 && nextStageIndex !== currentStage) {
+    if (
+      nextStageIndex !== -1 &&
+      nextStageIndex !== currentStage &&
+      currentTime >= recipe.steps[0].timestamp
+    ) {
       setCurrentStage(nextStageIndex);
-
-      // Scroll to the respective step
-      scrollRef.current?.scrollTo({
-        y: nextStageIndex * 60, // Adjust based on step height
-        animated: true,
-      });
+    } else if (currentTime < recipe.steps[0].timestamp) {
+      setCurrentStage(-1);
     }
   }, [currentTime]);
 
-  const goToStage = (stageIndex) => {
-    if (stageIndex < 0 || stageIndex >= recipe.steps.length) return;
+  useEffect(() => {
+    if (currentStage >= 0 && elementPositions.current[currentStage]) {
+      scrollToElement(currentStage);
+    }
+  }, [currentStage]);
 
-    setCurrentStage(stageIndex);
-    playerRef.current?.seekTo(recipe.steps[stageIndex].timestamp, true);
-
-    // Scroll to the respective step
-    scrollRef.current?.scrollTo({
-      y: stageIndex * 60, // Adjust based on step height
-      animated: true,
-    });
+  const measureAboveSteps = (event) => {
+    const { height } = event.nativeEvent.layout;
+    setOffsetAboveSteps(height);
   };
 
-  const nextStage = () => goToStage(currentStage + 1);
-  const prevStage = () => goToStage(currentStage - 1);
+  const handleLayout = (event, index) => {
+    const { y } = event.nativeEvent.layout;
+    elementPositions.current[index] = y;
+  };
 
-  const windowWidth = Dimensions.get("window").width;
-  const videoHeight = windowWidth * 9 / 16;
+  const scrollToElement = (index) => {
+    if (scrollRef.current && elementPositions.current[index] != null) {
+      scrollRef.current.scrollTo({
+        y: elementPositions.current[index] + offsetAboveSteps,
+        animated: true,
+      });
+    }
+  };
+
+  const goToStage = async (stageIndex) => {
+    if (stageIndex < 0) {
+      setCurrentStage(-1);
+      scrollRef.current.scrollTo({ y: 0, animated: true });
+      if (videoRef.current) {
+        await videoRef.current.setPositionAsync(0);
+      }
+    } else if (stageIndex >= recipe.steps.length) {
+      return;
+    } else {
+      setCurrentStage(stageIndex);
+      if (videoRef.current) {
+        await videoRef.current.setPositionAsync(recipe.steps[stageIndex].timestamp * 1000 + timeOffset);
+      }
+      scrollToElement(stageIndex);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      {/* YouTube Player */}
-      <YoutubePlayer
-          ref={playerRef}
-          height={videoHeight}
-          videoId={recipe.videoId}
-          play={true}
-          onChangeState={(state) => {
-            if (state === "ended") setCurrentStage(0); // Reset to first stage when video ends
-          }}
-        />
-        <View style={styles.stageControls}>
-          <TouchableOpacity onPress={prevStage} style={styles.controlButton}>
-            <Text style={styles.controlButtonText}>Previous</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={nextStage} style={styles.controlButton}>
-            <Text style={styles.controlButtonText}>Next</Text>
-          </TouchableOpacity>
-        </View>
-
-      {/* Scrollable Content */}
+      <Video
+        ref={videoRef}
+        source={{ uri: recipe.video }}
+        resizeMode={ResizeMode.CONTAIN}
+        useNativeControls
+        style={styles.video}
+        onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+      />
+      <TouchableOpacity
+        onPress={() => goToStage(currentStage - 1)}
+        style={[styles.navButton, styles.leftButton]}
+      >
+        <Text style={styles.navButtonText}>{"<"}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => goToStage(currentStage + 1)}
+        style={[styles.navButton, styles.rightButton]}
+      >
+        <Text style={styles.navButtonText}>{">"}</Text>
+      </TouchableOpacity>
       <ScrollView ref={scrollRef} style={styles.scrollableContent}>
-        <Text style={styles.title}>{recipe.title}</Text>
-
-        {/* Ingredients Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Ingredients</Text>
-          <View style={styles.listContainer}>
+        <View onLayout={measureAboveSteps}>
+          <Text style={styles.title}>{recipe.title}</Text>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Ingredients</Text>
             {recipe.ingredients.map((ingredient, index) => (
               <Text key={index} style={styles.listItem}>
                 - {ingredient}
@@ -117,23 +206,20 @@ const RecipePage = () => {
             ))}
           </View>
         </View>
-
-        {/* Steps Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Steps</Text>
-          <View style={styles.listContainer}>
-            {recipe.steps.map((step, index) => (
-              <Text
-                key={index}
-                style={[
-                  styles.listItem,
-                  index === currentStage && styles.highlightedStep,
-                ]}
-              >
-                {index + 1}. {step.text}
-              </Text>
-            ))}
-          </View>
+          {recipe.steps.map((step, index) => (
+            <View
+              key={index}
+              onLayout={(event) => handleLayout(event, index)}
+              style={[
+                styles.stepContainer,
+                currentStage === index && styles.highlightedStep,
+              ]}
+            >
+              <Text style={styles.stepText}>{step.text}</Text>
+            </View>
+          ))}
         </View>
       </ScrollView>
     </View>
@@ -145,26 +231,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  videoContainer: {
-    flex: 1,
-    backgroundColor: "#000",
+  video: {
     width: "100%",
-  },
-  stageControls: {
-    flexDirection: "row",
-    justifyContent: "center",
-    paddingVertical: 10,
-    backgroundColor: "#222",
-  },
-  controlButton: {
-    marginHorizontal: 20,
-    padding: 10,
-    backgroundColor: "#007BFF",
-    borderRadius: 5,
-  },
-  controlButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
+    height: videoHeight,
+    backgroundColor: "black",
   },
   scrollableContent: {
     flex: 1,
@@ -184,18 +254,42 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 10,
   },
-  listContainer: {
-    paddingLeft: 20,
-  },
   listItem: {
     fontSize: 16,
     marginBottom: 5,
   },
-  highlightedStep: {
-    backgroundColor: "#FFEB3B",
-    padding: 5,
+  stepContainer: {
+    padding: 10,
+    marginBottom: 10,
+    backgroundColor: "#f0f0f0",
     borderRadius: 5,
   },
+  stepText: {
+    fontSize: 16,
+  },
+  highlightedStep: {
+    backgroundColor: "#FFEB3B",
+  },
+  navButton: {
+    position: "absolute",
+    bottom: 20,
+    width: 60,
+    height: 60,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
+  },
+  leftButton: {
+    left: 20,
+  },
+  rightButton: {
+    right: 20,
+  },
+  navButtonText: {
+    color: "#fff",
+    fontSize: 30,
+    fontWeight: "bold",
+  },
 });
-
-export default RecipePage;

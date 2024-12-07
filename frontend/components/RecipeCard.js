@@ -2,52 +2,74 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const primaryFontSize = 16
-const secondaryFontSize = 14
+const primaryFontSize = 16;
+const secondaryFontSize = 14;
 
-export default function RecipeCard({recipe}) {
+const recipeId = {
+  title: "Easy chocolate fudge cake",
+  video: "https://0c18e53b.media.greenvideo.io/0c18e53b610964fac175fe0e757adc30557e79b7/878e15a9abb541b09ff0df43c2b45f79bd5d4c9c/MEDIA/v1/HD/media.mp4",
+  ingredients: [
+    "150ml sunflower oil",
+    "175g self-raising flour",
+    "2 tbsp cocoa powder",
+    "1 tsp bicarbonate of soda",
+    "150g caster sugar",
+    "2 tbsp golden syrup",
+    "2 large eggs",
+    "100g unsalted butter",
+    "225g icing sugar",
+    "40g cocoa powder",
+  ],
+  steps: [
+    { text: "Heat the oven to 180C/160C fan/gas 4. Oil and line the base of two 18cm sandwich tins. Sieve the flour, cocoa powder and bicarbonate of soda into a bowl. Add the caster sugar and mix well.", timestamp: 8 },
+    { text: "Make a well in the centre and add the golden syrup, eggs, sunflower oil and milk. Beat well with an electric whisk until smooth.", timestamp: 22 },
+    { text: "Pour the mixture into the two tins and bake for 25-30 mins until risen and firm to the touch. Remove from oven, leave to cool for 10 mins before turning out onto a cooling rack.", timestamp: 36 },
+    { text: "To make the icing, beat the unsalted butter in a bowl until soft. Gradually sieve and beat in the icing sugar and cocoa powder, then add enough of the milk to make the icing fluffy and spreadable.", timestamp: 45 },
+    { text: "Add the egg mixture to the pasta and toss quickly to create a creamy sauce.", timestamp: 55 },
+    { text: "Sandwich the two cakes together with the butter icing and cover the sides and the top of the cake with more icing.", timestamp: 65 },
+  ],
+};
+
+export default function RecipeCard({navigation, recipe}) {
   const [isfavourite, setFavourite] = useState(recipe.isFavourite);
   const toggleFavourite = () => {
     recipe.isFavourite = !isfavourite;
     setFavourite(!isfavourite);
-    console.log(recipe);
   };
 
   return (
     <View style={styles.recipeCard}>
-      {/* Recipe Image */}
       <View style={styles.recipeImageContainer}>
-        <Image source={{ uri: recipe.image }} style={styles.recipeImage} />
-        {/*Is Favourite*/}
+        <TouchableOpacity onPress={() => navigation.navigate('RecipePage', { recipeId: recipeId })}
+          style={styles.imageButton}
+        >
+          <Image source={{ uri: recipe.image }} style={styles.recipeImage} />
+        </TouchableOpacity>
+        
         <TouchableOpacity
           onPress={() => toggleFavourite()}
           style={styles.favoriteIconContainer}
         >
           <Icon
-            name={isfavourite ? 'heart' : 'heart-o'}  // 'heart' for filled, 'heart-o' for empty
+            name={isfavourite ? 'heart' : 'heart-o'}
             size={30}
             color={isfavourite ? 'red' : 'gray'}
           />
         </TouchableOpacity>
         {recipe.ingredients.some(ingredient => !ingredient.available) && (
-        <Icon
-          name="exclamation-circle"
-          size={30}
-          color="red"
-          style={styles.exclamationIcon}
-        />
-      )}
+          <Icon
+            name="exclamation-circle"
+            size={30}
+            color="red"
+            style={styles.exclamationIcon}
+          />
+        )}
       </View>
-      {/* Recipe Title */}
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Text style={styles.recipeText}>{recipe.title}</Text>
       </View>
-      
-      {/* Recipe Description */}
       <Text style={styles.descriptionText}>{recipe.description}</Text>
-      {/* Filters and Stars Container */}
       <View style={styles.filterAndStarsContainer}>
-        {/* Filters */}
         <View style={styles.filtersContainer}>
           {recipe.filters && recipe.filters.length > 0 && recipe.filters.map((filter, index) => (
             <React.Fragment key={index}>
@@ -58,7 +80,6 @@ export default function RecipeCard({recipe}) {
             </React.Fragment>
           ))}
         </View>
-        {/* Stars Rating */}
         <View style={styles.starContainer}>
           <Text style={styles.recipeText}>
             {[...Array(5)].map((_, index) => {
@@ -94,14 +115,13 @@ export default function RecipeCard({recipe}) {
           </Text>
         </View>
       </View>
-      {/* Ingredients Horizontal Scroll */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.ingredientsScroll}>
         {recipe.ingredients.map((ingredient, index) => (
           <Text
             key={index}
             style={[
               styles.ingredientText,
-              !ingredient.available && styles.missingIngredientText, // Apply red color for missing ingredients
+              !ingredient.available && styles.missingIngredientText,
             ]}
           >
             {ingredient.name} ({ingredient.quantity})
@@ -113,60 +133,6 @@ export default function RecipeCard({recipe}) {
 }
 
 const styles = StyleSheet.create({
-  // Main container styles
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  mainContainer: {
-    flex: 1,
-  },
-
-  // Filter Section
-  selectionView: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    marginTop: 10,
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-  },
-  scrollContainer: {
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingRight: 10,
-  },
-  filterButton: {
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    marginLeft: 10,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.5,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 4, // Android shadows
-    alignSelf: 'flex-start',
-  },
-  filterButtonActive: {
-    backgroundColor: '#148B4E',
-  },
-  filterText: {
-    color: '#000',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  filterTextActive: {
-    color: '#fff',
-  },
-
-  // Recipe Card Section
-  recipesContainer: {
-    marginTop: 5,
-    marginHorizontal: 10,
-  },
   recipeCard: {
     backgroundColor: '#148B4E',
     marginBottom: 10,
@@ -176,25 +142,33 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
-    elevation: 4, // Android shadows
+    elevation: 4,
   },
   recipeImageContainer: {
     position: 'relative',
     width: '100%',
     height: undefined,
-    aspectRatio: 16 / 9, // Maintain aspect ratio
+    aspectRatio: 16 / 9,
   },
   recipeImage: {
     width: '100%',
-    height: '100%', // Full container size
+    height: '100%',
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
+  },
+  imageButton: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 0, // Ensure image button is under the favorite and exclamation icons
   },
   favoriteIconContainer: {
     position: 'absolute',
     top: 10,
     right: 10,
-    zIndex: 1, // Ensure it's above the image
+    zIndex: 1,
   },
   exclamationIcon: {
     position: 'absolute',
@@ -203,13 +177,11 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   filterAndStarsContainer: {
-    flexDirection: 'row',  // Align filters and stars horizontally
-    justifyContent: 'space-between',  // Space out filters and stars
-    alignItems: 'center',  // Vertically center the content
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 5,
   },
-
-  // Recipe Texts
   recipeText: {
     fontSize: primaryFontSize,
     fontWeight: 'bold',
@@ -226,14 +198,6 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     color: '#fff',
   },
-  starContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingRight: 5,
-  },
-
-  // Filter Badges (Applied to Recipe Filters)
   filtersContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -251,15 +215,16 @@ const styles = StyleSheet.create({
   circle: {
     width: 16,
     height: 16,
-    borderRadius: 8,  // Makes it circular
+    borderRadius: 8,
     backgroundColor: '#fff',
     alignSelf: 'center',
     marginHorizontal: 5,
   },
-
-  // Ingredients Section
-  ingredientsScroll: {
-    paddingVertical : 5,
+  starContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingRight: 5,
   },
   ingredientText: {
     fontSize: secondaryFontSize,
@@ -268,66 +233,9 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   missingIngredientText: {
-    color: 'red', // Font color for missing ingredients
-  },
-  // Modal Styles
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
-  },
-  modalContent: {
-    width: 300,
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  scrollViewModal: {
-    maxHeight: 300,
-    width: '100%',
-  },
-  modalCloseButton: {
-    backgroundColor: '#148B4E',
-    borderRadius: 25,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    marginTop: 20,
-    width: '80%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    elevation: 5,
-  },
-  modalCloseButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
-  },
-
-  // Content Styles
-  available: {
-    color: 'green',
-    fontWeight: 'bold',
-  },
-  missing: {
     color: 'red',
-    fontWeight: 'bold',
   },
-
-  contentText: {
-    marginTop: 20,
-    fontSize: 16,
-    textAlign: 'center',
+  ingredientsScroll: {
+    paddingVertical : 5,
   },
 });

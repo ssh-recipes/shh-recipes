@@ -9,9 +9,6 @@ const secondaryFontSize = 14
 
 export default function DieatryReqs({isFilterVisible, setFilterVisible}) {
   const [selectedFilters, setSelectedFilters] = useState([]);
-  
-  // Modal visibility state for the filters menu
-  // const [isFilterModalVisible, setFilterModalVisible] = useState(true);
 
   const toggleFilter = (filter) => {
     if (selectedFilters.includes(filter)) {
@@ -65,7 +62,6 @@ export default function DieatryReqs({isFilterVisible, setFilterVisible}) {
 }
 
 const styles = StyleSheet.create({
-  // Main container styles
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -74,7 +70,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Filter Section
   selectionView: {
     flexDirection: 'row',
     alignItems: 'center',

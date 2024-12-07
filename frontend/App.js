@@ -9,7 +9,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Drawer.Navigator
-        initialRouteName="RecipePage"
+        initialRouteName="Home"
         screenOptions={{
           headerStyle: {
             backgroundColor: '#148B4E', // Custom header color
