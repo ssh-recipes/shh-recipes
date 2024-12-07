@@ -137,7 +137,7 @@ app.put('/:recipeId/favourite', async (c) => {
     }
 });
 
-app.post('/:recipeId/rating', async (c) => {
+app.put('/:recipeId/rating', async (c) => {
     try {
         const userId = c.get('user')['id'];
         const recipeId = c.req.param('recipeId');
