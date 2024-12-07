@@ -78,18 +78,21 @@ export const getRecipes = async (category, skip, take) => {
 			{
 				"id": "cheese_omellete",
 				"name": "Cheese Omelette",
-				"icon": "icons/cheese_omellette.png", // the api will host static assets, so icon would be BASE_URL/static/icons/cheese_omellete.png for example
+				"icon": "https://www.spicebangla.com/wp-content/uploads/2024/08/Cheese-Omelette.webp", // the api will host static assets, so icon would be BASE_URL/static/icons/cheese_omellete.png for example
 				"video": "videos/cheese_omellete_vid.mp4",
 				"description": "A delicious cheese omelette.",
 				"instructions": "Whisk eggs and add cheese.",
 				"avg_rating": 9, // 0-10, divide by 2 to get the "stars", e.g. 9 means 4.5/5
+				"rules": [
+					"Halal"
+				],
 				"ingredients": [
 					{
 						"id": "egg",
 						"name": "Egg",
 						"quantity": 2,
 						"unit": "quantity",
-						"fulfilled": true
+						"fulfilled": false
 					},
 					{
 						"id": "milk",
@@ -106,11 +109,14 @@ export const getRecipes = async (category, skip, take) => {
 			{
 				"id": "carrot_salad",
 				"name": "Carrot Salad",
-				"icon": "icons/carrot_salad.png",
+				"icon": "https://www.healthyfood.com/wp-content/uploads/2016/09/Moroccan-carrot-salad-2000x1283.jpg",
 				"video": "videos/carrot_salad_video.mp4",
 				"description": "A healthy carrot salad.",
 				"instructions": "Grate carrots and add dressing.",
 				"avg_rating": 6,
+				"rules": [
+					"Halal", "Dairy-Free"
+				],
 				"ingredients": [
 					{
 						"id": "carrot",

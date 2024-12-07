@@ -39,7 +39,7 @@ export default function DietryReqs({isFilterVisible, setFilterVisible}) {
         setFilters([]);
       }
     } catch (error) {
-      console.error("Error fetching recipe:", error);
+      console.error("Error fetching rules:", error);
     }
   }
 

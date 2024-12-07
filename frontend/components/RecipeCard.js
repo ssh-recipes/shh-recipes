@@ -7,9 +7,9 @@ const primaryFontSize = 16;
 const secondaryFontSize = 14;
 
 export default function RecipeCard({navigation, recipe}) {
-  const [isfavourite, setFavourite] = useState(recipe.isFavourite);
+  const [isfavourite, setFavourite] = useState(recipe.favourite);
   const toggleFavourite = () => {
-    recipe.isFavourite = !isfavourite;
+    // recipe.isFavourite = !isfavourite;
     setFavourite(!isfavourite);
   };
 
@@ -37,7 +37,7 @@ export default function RecipeCard({navigation, recipe}) {
         <TouchableOpacity onPress={() => fetchDataNavigate()}
           style={styles.imageButton}
         >
-          <Image source={{ uri: recipe.image }} style={styles.recipeImage} />
+          <Image source={{ uri: recipe.icon }} style={styles.recipeImage} />
         </TouchableOpacity>
         
         <TouchableOpacity
@@ -50,7 +50,7 @@ export default function RecipeCard({navigation, recipe}) {
             color={isfavourite ? 'red' : 'gray'}
           />
         </TouchableOpacity>
-        {recipe.ingredients.some(ingredient => !ingredient.available) && (
+        {recipe.ingredients.some(ingredient => !ingredient.fulfilled) && (
           <Icon
             name="exclamation-circle"
             size={30}
@@ -60,24 +60,25 @@ export default function RecipeCard({navigation, recipe}) {
         )}
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Text style={styles.recipeText}>{recipe.title}</Text>
+        <Text style={styles.recipeText}>{recipe.name}</Text>
       </View>
       <Text style={styles.descriptionText}>{recipe.description}</Text>
       <View style={styles.filterAndStarsContainer}>
         <View style={styles.filtersContainer}>
-          {recipe.filters && recipe.filters.length > 0 && recipe.filters.map((filter, index) => (
+          {recipe.rules && recipe.rules.length > 0 && recipe.rules.map((filter, index) => (
             <React.Fragment key={index}>
               <Text style={styles.filterBadge}>
                 {filter}
               </Text>
-              {index < recipe.filters.length - 1 && <View style={styles.circle} />}
+              {index < recipe.rules.length - 1 && <View style={styles.circle} />}
             </React.Fragment>
           ))}
         </View>
         <View style={styles.starContainer}>
           <Text style={styles.recipeText}>
             {[...Array(5)].map((_, index) => {
-              if (index < Math.floor(recipe.rating)) {
+              const rating = recipe.avg_rating / 2;
+              if (index < Math.floor(rating)) {
                 return (
                   <Icon 
                     key={index} 
@@ -86,7 +87,7 @@ export default function RecipeCard({navigation, recipe}) {
                     color="gold" 
                   />
                 );
-              } else if (index < recipe.rating) {
+              } else if (index < rating) {
                 return (
                   <Icon 
                     key={index} 
@@ -115,10 +116,10 @@ export default function RecipeCard({navigation, recipe}) {
             key={index}
             style={[
               styles.ingredientText,
-              !ingredient.available && styles.missingIngredientText,
+              !ingredient.fulfilled && styles.missingIngredientText,
             ]}
           >
-            {ingredient.name} ({ingredient.quantity})
+            {ingredient.name} ({ingredient.quantity}{ingredient.unit !== "quantity" ? " " + ingredient.unit : ""})
           </Text>
         ))}
       </ScrollView>

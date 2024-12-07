@@ -37,23 +37,6 @@ export default function RecipePage({ route }) {
     enableAudio();
   }, []);
 
-  // const fetchRecipeData = async (id) => {
-  //   try {
-  //     const fRecipe = await getRecipe(id);
-  
-  //     if (fRecipe && fRecipe.success) {
-  //       setRecipe(fRecipe.data);
-  //     } else {
-  //       console.error("Error: Fetch recipe in RecipePage.")
-  //       //navigate to error page
-  //       return null
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching recipe:", error);
-  //     return null;
-  //   }
-  // }
-
   //updates current time and fixes ios audio issue
   const handlePlaybackStatusUpdate = (status) => {
     setIsPlaying(status.isPlaying);
