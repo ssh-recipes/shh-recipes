@@ -4,6 +4,7 @@ config({ path: '.env.local' });
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { createMiddleware } from "hono/factory";
+import { serveStatic } from '@hono/node-server/serve-static'
 
 import db from "./db.js";
 
@@ -12,6 +13,9 @@ import rules from './routes/rules.js';
 import recipes from './routes/recipes.js';
 
 const app = new Hono();
+
+
+app.use('/static/*', serveStatic({ root: './' }))
 
 app.notFound((c) => c.json({
     success: false,
