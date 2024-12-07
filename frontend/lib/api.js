@@ -173,6 +173,16 @@ export const setIsRecipeFavourite = async (recipeId, favourite) => {
     }
 }
 
+// PUT /recipes/:recipeId/rating
+// body: {
+// 	"rating": number
+// }
+export const setRecipeRating = async (recipeId, rating) => {
+    return {
+	"success": true,
+    }
+}
+
 // POST /recipes/:recipeId/cooked
 export const recordRecipeCooked = async (recipeId) => {
     return {
