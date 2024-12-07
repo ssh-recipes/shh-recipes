@@ -4,27 +4,28 @@ const app = new Hono();
 
 app.get('/', async (c) => {
     try {
-	const user = c.get("user");
+        const user = c.get("user");
         const { category, skip, take } = c.req.query();
 
         const [rows] = await db.query(
-	    `
-SELECT DISTINCT r.*
-FROM Recipe r
-LEFT JOIN RecipeIngredient ri ON r.id = ri.recipe_id
-LEFT JOIN IngredientRule ir ON ri.ingredient_id = ir.ingredient_id
-LEFT JOIN UserRule ur ON ir.rule_id = ur.rule_id AND ur.user_id = ?
-WHERE r.id NOT IN (
-    SELECT r2.id
-    FROM Recipe r2
-    JOIN RecipeIngredient ri2 ON r2.id = ri2.recipe_id
-    JOIN IngredientRule ir2 ON ri2.ingredient_id = ir2.ingredient_id
-    JOIN UserRule ur2 ON ir2.rule_id = ur2.rule_id
-    WHERE ur2.user_id = ?
-);
-            `,
-	    [user.id, user.id]
-        );
+                `
+            SELECT DISTINCT r.*, AVG(urr.rating) AS avg_rating 
+                FROM Recipe r
+            LEFT JOIN RecipeIngredient ri ON r.id = ri.recipe_id
+            LEFT JOIN IngredientRule ir ON ri.ingredient_id = ir.ingredient_id
+            LEFT JOIN UserRule ur ON ir.rule_id = ur.rule_id AND ur.user_id = ?
+            LEFT JOIN UserRecipe urr ON r.id = urr.recipe_id
+                WHERE r.id NOT IN (
+                    SELECT r2.id
+                        FROM Recipe r2
+                    JOIN RecipeIngredient ri2 ON r2.id = ri2.recipe_id
+                    JOIN IngredientRule ir2 ON ri2.ingredient_id = ir2.ingredient_id
+                    JOIN UserRule ur2 ON ir2.rule_id = ur2.rule_id
+                        WHERE ur2.user_id = ?
+                                  )
+            GROUP BY r.id;`,
+            [user.id, user.id]
+                );
 
         return c.json({
             success: true,
@@ -35,6 +36,7 @@ WHERE r.id NOT IN (
                 video: recipe.video,
                 description: recipe.description,
                 instructions: recipe.instructions,
+                avg_rating: recipe.avg_rating,
             })),
         });
     } catch (err) {
@@ -46,8 +48,15 @@ WHERE r.id NOT IN (
 app.get('/:recipeId', async (c) => {
     try {
         const recipeId = c.req.param('recipeId');
-        const [rows] = await db.query('SELECT * FROM Recipe WHERE id = ?', [recipeId]);
-
+        const [rows] = await db.query(
+                `
+            SELECT r.*, AVG(ur.rating) AS avg_rating
+             FROM Recipe r
+             LEFT JOIN UserRecipe ur ON r.id = ur.recipe_id
+             WHERE r.id = ?
+             GROUP BY r.id;`,
+            [recipeId]
+                );
         if (rows.length === 0) {
             return c.json({ success: false, error: 'Recipe not found' }, 404);
         }
@@ -71,6 +80,7 @@ app.get('/:recipeId', async (c) => {
                 times_cooked: recipe.times_cooked,
                 favourite: recipe.favourite,
                 last_cooked: recipe.last_cooked,
+                avg_rating: recipe.avg_rating,
             },
         });
     } catch (err) {
@@ -126,4 +136,27 @@ app.put('/:recipeId/favourite', async (c) => {
         return c.json({ success: false, error: 'Error updating favourite status' }, 500);
     }
 });
+
+app.post('/:recipeId/rating', async (c) => {
+    try {
+        const userId = c.get('user')['id'];
+        const recipeId = c.req.param('recipeId');
+        const { rating } = await c.req.json();
+
+        if (rating < 1 || rating > 10 || !Number.isInteger(rating)) {
+            return c.json({ success: false, error: 'Rating must be an integer between 1 and 10' }, 400);
+        }
+
+        await db.query(
+            'INSERT INTO UserRecipe (user_id, recipe_id, rating) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE rating = ?',
+            [userId, recipeId, rating, rating]
+        );
+
+        return c.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        return c.json({ success: false, error: 'Error submitting rating' }, 500);
+    }
+});
+
 export default app;

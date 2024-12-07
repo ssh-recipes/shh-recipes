@@ -92,6 +92,7 @@ const seed = async () => {
             recipe_id VARCHAR(255) NOT NULL,
             favourite BOOLEAN DEFAULT FALSE,
             last_cooked DATE,
+            rating INT DEFAULT NULL,
             PRIMARY KEY (user_id, recipe_id),
             FOREIGN KEY (user_id) REFERENCES User (id) ON DELETE CASCADE,
             FOREIGN KEY (recipe_id) REFERENCES Recipe (id) ON DELETE RESTRICT
