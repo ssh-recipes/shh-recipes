@@ -5,7 +5,9 @@ const app = new Hono();
 app.get('/', async (c) => {
     try {
         const user = c.get("user");
-        const { category, skip, take } = c.req.query();
+        const { category, skip, take, sortBy } = c.req.query();
+
+        console.log('Query parameters:', { category, skip, take, sortBy });
 
         const [rows] = await db.query(`
             SELECT DISTINCT r.*, AVG(urr.rating) AS avg_rating, urr.favourite, urr.last_cooked, urr.recipe_id
@@ -25,7 +27,7 @@ app.get('/', async (c) => {
             GROUP BY r.id, urr.favourite, urr.last_cooked, urr.recipe_id;
         `, [user.id, user.id]);
 
-        const recipesWithDetails = await Promise.all(rows.map(async (recipe) => {
+        let recipesWithDetails = await Promise.all(rows.map(async (recipe) => {
             const [ingredients] = await db.query(
                 'SELECT i.id, i.name, ri.quantity, ri.unit FROM Ingredient i, RecipeIngredient ri WHERE ri.ingredient_id = i.id AND ri.recipe_id = ?',
                 [recipe.id]
@@ -48,6 +50,28 @@ app.get('/', async (c) => {
                 rules: rules.map(rule => rule.rule_id),
             };
         }));
+
+        console.log('Recipes with details before sorting/filtering:', recipesWithDetails);
+
+        if (sortBy === 'recent') {
+            console.log('Sorting by recent');
+            recipesWithDetails = recipesWithDetails.sort((a, b) => new Date(b.last_cooked) - new Date(a.last_cooked));
+            console.log('Sorted by recent:', recipesWithDetails);
+        } else if (sortBy === 'favourite') {
+            console.log('Filtering by favourite');
+            recipesWithDetails = recipesWithDetails.filter(recipe => recipe.favourite);
+            console.log('Filtered by favourite:', recipesWithDetails);
+        }
+
+        if (skip) {
+            console.log('Applying skip:', skip);
+            recipesWithDetails = recipesWithDetails.slice(Number(skip));
+        }
+
+        if (take) {
+            console.log('Applying take:', take);
+            recipesWithDetails = recipesWithDetails.slice(0, Number(take));
+        }
 
         return c.json({
             success: true,
