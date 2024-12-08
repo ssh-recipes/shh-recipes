@@ -36,8 +36,6 @@ app.get('/', async (c) => {
                 [recipe.id]
             );
 
-            console.log(`Recipe ID: ${recipe.id}, Rules:`, rules);
-
             return {
                 ...recipe,
                 ingredients: ingredients.map(ingredient => ({
@@ -126,7 +124,7 @@ app.post('/:recipeId/cooked', async (c) => {
         await db.query('UPDATE Recipe SET times_cooked = times_cooked + 1 WHERE id = ?', [recipeId]);
 
         await db.query(
-            'UPDATE UserRecipe SET last_cooked = CURRENT_DATE, favourite = favourite + 1 WHERE user_id = ? AND recipe_id = ?',
+            'UPDATE UserRecipe SET last_cooked = CURRENT_TIMESTAMP WHERE user_id = ? AND recipe_id = ?',
             [userId,recipeId]
         );
 

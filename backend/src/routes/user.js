@@ -12,7 +12,7 @@ app.get('/', async (c) => {
             success: true,
             data: {
                 name: user.name,
-                rules: rules.map(rule => rule.id),
+                rules: rules.map(rule => rule.name),
             },
         });
     } catch (err) {
