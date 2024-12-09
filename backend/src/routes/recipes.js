@@ -5,9 +5,9 @@ const app = new Hono();
 app.get('/', async (c) => {
     try {
         const user = c.get("user");
-        const { category, skip, take, sortBy } = c.req.query();
+        const { category, skip, take } = c.req.query();
 
-        console.log('Query parameters:', { category, skip, take, sortBy });
+        console.log('Query parameters:', { category, skip, take });
 
         const [rows] = await db.query(`
             SELECT DISTINCT r.*, AVG(urr.rating) AS avg_rating, urr.favourite, urr.last_cooked, urr.recipe_id
@@ -38,26 +38,35 @@ app.get('/', async (c) => {
                 [recipe.id]
             );
 
-            return {
-                ...recipe,
-                ingredients: ingredients.map(ingredient => ({
+            const ingredientsWithFulfillment = await Promise.all(ingredients.map(async ingredient => {
+                const [userIngredient] = await db.query(
+                    'SELECT 1 FROM UserIngredient WHERE user_id = ? AND ingredient_id = ?',
+                    [user.id, ingredient.id]
+                );
+
+                return {
                     id: ingredient.id,
                     name: ingredient.name,
                     quantity: ingredient.quantity,
                     unit: ingredient.unit,
-                    fulfilled: false
-                })),
+                    fulfilled: userIngredient.length > 0
+                };
+            }));
+
+            return {
+                ...recipe,
+                ingredients: ingredientsWithFulfillment,
                 rules: rules.map(rule => rule.rule_id),
             };
         }));
 
         console.log('Recipes with details before sorting/filtering:', recipesWithDetails);
 
-        if (sortBy === 'recent') {
+        if (category === 'recent') {
             console.log('Sorting by recent');
             recipesWithDetails = recipesWithDetails.sort((a, b) => new Date(b.last_cooked) - new Date(a.last_cooked));
             console.log('Sorted by recent:', recipesWithDetails);
-        } else if (sortBy === 'favourite') {
+        } else if (category === 'favourite') {
             console.log('Filtering by favourite');
             recipesWithDetails = recipesWithDetails.filter(recipe => recipe.favourite);
             console.log('Filtered by favourite:', recipesWithDetails);
