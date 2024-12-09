@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   filterButtonActive: {
-    backgroundColor: '#148B4E',
+    backgroundColor: "#FFB23F",
   },
   filterText: {
     color: '#000',
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   filterTextActive: {
-    color: '#fff',
+    color: '#000',
   },
   recipesContainer: {
     marginTop: 5,
