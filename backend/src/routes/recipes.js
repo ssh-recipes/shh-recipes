@@ -2,12 +2,26 @@ import { Hono } from "hono";
 import db from "../db.js";
 const app = new Hono();
 
+const calculateRecommendationScore = (recipe, userIngredients) => {
+  let score = 0;
+  if (recipe.favourite) score += 20;
+  score += recipe.times_cooked * 2;
+
+  const allIngredientsFulfilled = recipe.ingredients.every((ingredient) =>
+    userIngredients.some(
+      (userIngredient) =>
+        userIngredient.id === ingredient.id && userIngredient.fulfilled,
+    ),
+  );
+
+  if (allIngredientsFulfilled) score += 30;
+  return score;
+};
+
 app.get("/", async (c) => {
   try {
     const user = c.get("user");
     const { category, skip, take } = c.req.query();
-
-    console.log("Query parameters:", { category, skip, take });
 
     const [rows] = await db.query(
       `
@@ -67,34 +81,23 @@ app.get("/", async (c) => {
       }),
     );
 
-    console.log(
-      "Recipes with details before sorting/filtering:",
-      recipesWithDetails,
-    );
-
     if (category === "recent") {
-      console.log("Sorting by recent");
       recipesWithDetails = recipesWithDetails.sort(
         (a, b) => new Date(b.last_cooked) - new Date(a.last_cooked),
       );
-      console.log("Sorted by recent:", recipesWithDetails);
     } else if (category === "favourite") {
-      console.log("Filtering by favourite");
       recipesWithDetails = recipesWithDetails.filter(
         (recipe) => recipe.favourite,
       );
-      console.log("Filtered by favourite:", recipesWithDetails);
+    } else if (category === "recommended") {
+      recipesWithDetails = recipesWithDetails.sort(
+        (a, b) =>
+          calculateRecommendationScore(b) - calculateRecommendationScore(a),
+      );
     }
 
-    if (skip) {
-      console.log("Applying skip:", skip);
-      recipesWithDetails = recipesWithDetails.slice(Number(skip));
-    }
-
-    if (take) {
-      console.log("Applying take:", take);
-      recipesWithDetails = recipesWithDetails.slice(0, Number(take));
-    }
+    if (skip) recipesWithDetails = recipesWithDetails.slice(Number(skip));
+    if (take) recipesWithDetails = recipesWithDetails.slice(0, Number(take));
 
     return c.json({
       success: true,
