@@ -1,17 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Modal } from 'react-native';
-import { getRules, getUser } from '../lib/api';
+import { getRules, getUser, setIsRuleEnabled } from '../lib/api';
 
 export default function DietaryReqs({isFilterVisible, setFilterVisible}) {
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [filters, setFilters] = useState([]);
 
-  const toggleFilter = (filter) => {
-    if (selectedFilters.includes(filter)) {
-      setSelectedFilters(selectedFilters.filter((item) => item !== filter));
+  const toggleFilter = async (filter) => {
+    console.log(filter)
+    console.log(selectedFilters)
+    if (selectedFilters.some(selFilter => selFilter === filter.id)) {
+      setSelectedFilters(selectedFilters.filter((item) => item !== filter.id));
+
+      const response = await setIsRuleEnabled(filter.id, true);
+      if (!response || response.success === false) {
+        console.error("Error: setIsRuleEnabled " + response.success);
+      }
     } else {
-      setSelectedFilters([...selectedFilters, filter]);
+      setSelectedFilters([...selectedFilters, filter.id]);
+
+      const response = await setIsRuleEnabled(filter.id, false);
+      if (!response || response.success === false) {
+        console.error("Error: setIsRuleEnabled " + response.success);
+      }
     }
   };
 
@@ -19,7 +31,7 @@ export default function DietaryReqs({isFilterVisible, setFilterVisible}) {
     fetchUserFilters();
   }, [])
 
-  //get filters
+  //get filters from backend
   const fetchUserFilters = async () => {
     try {
       const fRules = await getRules();

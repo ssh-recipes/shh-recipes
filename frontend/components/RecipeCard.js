@@ -1,23 +1,31 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { getRecipe } from "../lib/api";
+import { getRecipe, setIsRecipeFavourite } from "../lib/api";
 
 const primaryFontSize = 16;
 const secondaryFontSize = 14;
 
 export default function RecipeCard({navigation, recipe}) {
   const [isfavourite, setFavourite] = useState(recipe.favourite);
-  const toggleFavourite = () => {
+
+  //change isFavourite and send to backend
+  const toggleFavourite = async () => {
     // recipe.isFavourite = !isfavourite;
+    const result = await setIsRecipeFavourite(recipe.id, !isfavourite);
+    if (!result || result.success === false) {
+      console.error("Error: setIsRecipeFavourite " + result.success);
+    }
     setFavourite(!isfavourite);
   };
 
+  //this will be usefull later so we do not load all recipe data for recipeList
   const fetchDataNavigate = async () => {
     try {
       const fRecipe = await getRecipe(recipe.id);
   
       if (fRecipe && fRecipe.success) {
+        // navigation.navigate('RecipePage', { recipe: recipe }) //could be used instead
         navigation.navigate('RecipePage', { recipe: fRecipe.data })
       } else {
         console.error("Error: Fetch recipe in RecipePage.")
