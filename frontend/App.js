@@ -15,7 +15,7 @@ export default function App() {
         initialRouteName="Recipes"
         screenOptions={{
           headerStyle: {
-            backgroundColor: '#148B4E', // Custom header color
+            backgroundColor: "#148B4E", // Custom header color
             //for ios
             shadowColor: '#000',
             shadowOpacity: 0.2,
