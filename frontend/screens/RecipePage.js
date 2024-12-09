@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Platform, Alert } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Alert } from "react-native";
 import { Audio, Video, ResizeMode } from "expo-av";
+import { startCookingRecipe } from "../lib/api";
 
 const timeOffset = 300 //300 miliseconds to fix errors with current stage
 
 export default function RecipePage({ route }) {
   const { recipe } = route.params;
+  const [recipeStarted, setRecipeStarted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStage, setCurrentStage] = useState(-1);
   const [currentTime, setCurrentTime] = useState(0);
@@ -45,7 +47,7 @@ export default function RecipePage({ route }) {
 
   // to show alert with 2 questions
   const showAlert = async (question, onYes = undefined, onNo = undefined) => {
-    if (Platform.OS === 'web') {
+    if (Platform.OS === "web") {
       const responce = confirm(question);
       if (responce) {
         if (onYes) {
@@ -84,8 +86,8 @@ export default function RecipePage({ route }) {
   }
 
   //to show alert with one question
-  const showMessage = (message) => {
-    if (Platform.OS === 'web') {
+  const showMessage = (message, action = undefined) => {
+    if (Platform.OS === "web") {
       alert(message);
     } else {
       Alert.alert(
@@ -93,12 +95,33 @@ export default function RecipePage({ route }) {
         null,
         [
           {
-            text: 'Close',
+            text: "Close",
+            onPress: () => { 
+              if (action) {
+                action();
+              }
+            }
           },
         ],
         { cancelable: false }
       );
     }
+  }
+
+  const onStartCooking = async () => {
+    setRecipeStarted(true);
+    showAlert(
+      "Would you like to book the kitchen for 35 minutes?",
+      () => {
+        // here should be api call to booking system
+        showMessage("The kitchen has been booked for you for 35 minutes.");
+      }
+    );
+    const responce = await startCookingRecipe();
+    if (!responce || responce.success === false) {
+      console.error("Error: could not startCookingRecipe");
+    }
+    setIsPlaying(true);
   }
 
   //starts/stops a video on isPlaying. Fixes IOS audio
@@ -186,7 +209,7 @@ export default function RecipePage({ route }) {
         style={styles.video}
         onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
         onReadyForDisplay={videoData => {
-          if (Platform.OS === 'web') {
+          if (Platform.OS === "web") {
             videoData.srcElement.style.position = "initial";
           }
         }}
@@ -197,15 +220,24 @@ export default function RecipePage({ route }) {
       >
         <Text style={styles.navButtonText}>{"<"}</Text>
       </TouchableOpacity>
+
       <TouchableOpacity
         onPress={() => goToStage(currentStage + 1)}
         style={[styles.navButton, styles.rightButton]}
       >
         <Text style={styles.navButtonText}>{">"}</Text>
       </TouchableOpacity>
+
       <ScrollView ref={scrollRef} style={styles.scrollableContent}>
         <View onLayout={measureAboveSteps}>
-          <Text style={styles.title}>{recipe.name}</Text>
+          <View style={styles.startContainer}>
+            <Text style={styles.title}>{recipe.name}</Text>
+            {( !recipeStarted &&
+            <TouchableOpacity style={styles.startButton} onPress={() => onStartCooking()}>
+              <Text style={styles.startButtonText}>Start Cooking</Text>
+            </TouchableOpacity>
+            )}
+          </View>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Ingredients</Text>
             {recipe.ingredients.map((ingredient, index) => (
@@ -248,13 +280,12 @@ const styles = StyleSheet.create({
   },
   scrollableContent: {
     flex: 1,
-    padding: 10,
+    padding: 25,
     paddingBottom: 50,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginVertical: 10,
     textAlign: "center",
   },
   section: {
@@ -272,7 +303,7 @@ const styles = StyleSheet.create({
   stepContainer: {
     padding: 10,
     marginBottom: 10,
-    backgroundColor: "#f0fff0",
+    backgroundColor: "rgba(230, 230, 230, 0.4)",
     borderRadius: 5,
   },
   stepText: {
@@ -291,6 +322,32 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     zIndex: 10,
+  },
+  startContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    // padding: 10,
+    // margin: 10,
+  },
+  startButton: {
+    backgroundColor: "#148B4E",
+    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    // marginLeft: 10,
+    // marginBottom: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 4,
+    alignSelf: "flex-start",
+  },
+  startButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
   },
   leftButton: {
     left: 20,

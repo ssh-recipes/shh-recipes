@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   filterButtonActive: {
-    backgroundColor: '#148B4E',
+    backgroundColor: "#FFB23F",
   },
   filterText: {
     color: '#000',
@@ -120,13 +120,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   filterTextActive: {
-    color: '#fff',
+    color: '#000',
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   modalContent: {
     width: 300,
