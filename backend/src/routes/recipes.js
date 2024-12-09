@@ -112,7 +112,7 @@ app.get("/", async (c) => {
         rules: recipe.rules,
         ingredients: recipe.ingredients,
         times_cooked: recipe.times_cooked,
-        favourite: recipe.favourite,
+        favourite: recipe.favourite == 1 ? true : false,
         last_cooked: recipe.last_cooked,
       })),
     });
@@ -156,7 +156,7 @@ app.get("/:recipeId", async (c) => {
         avg_rating: recipe.avg_rating,
         ingredients: ingredients,
         times_cooked: recipe.times_cooked,
-        favourite: recipe.favourite,
+        favourite: recipe.favourite == 1 ? true : false,
         last_cooked: recipe.last_cooked,
       },
     });
