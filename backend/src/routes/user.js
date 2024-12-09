@@ -15,7 +15,7 @@ app.get("/", async (c) => {
       success: true,
       data: {
         name: user.name,
-        rules: rules.map((rule) => rule.name),
+        rules: rules.map((rule) => rule.id),
       },
     });
   } catch (err) {
