@@ -8,8 +8,6 @@ export default function DietaryReqs({isFilterVisible, setFilterVisible}) {
   const [filters, setFilters] = useState([]);
 
   const toggleFilter = async (filter) => {
-    console.log(filter)
-    console.log(selectedFilters)
     if (selectedFilters.some(selFilter => selFilter === filter.id)) {
       setSelectedFilters(selectedFilters.filter((item) => item !== filter.id));
 
@@ -35,19 +33,19 @@ export default function DietaryReqs({isFilterVisible, setFilterVisible}) {
   const fetchUserFilters = async () => {
     try {
       const fRules = await getRules();
-      const fUser = await getUser()
+      const fUser = await getUser();
 
       if (fUser && fUser.success) {
         setSelectedFilters(fUser.data.rules);
       } else {
-        console.error("Error: Fetch rules in DietaryReqs.")
+        console.error("Error: Fetch rules in DietaryReqs.");
         setSelectedFilters([]);
       }
   
       if (fRules && fRules.success) {
         setFilters(fRules.data);
       } else {
-        console.error("Error: Fetch recipe in DietaryReqs.")
+        console.error("Error: Fetch recipe in DietaryReqs.");
         setFilters([]);
       }
     } catch (error) {
