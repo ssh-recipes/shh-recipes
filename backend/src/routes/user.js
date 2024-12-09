@@ -7,7 +7,7 @@ app.get("/", async (c) => {
   try {
     const user = c.get("user");
     const [rules] = await db.query(
-      "SELECT r.name FROM Rule r, UserRule ur WHERE ur.rule_id = r.id AND ur.user_id = ?",
+      "SELECT r.id FROM Rule r, UserRule ur WHERE ur.rule_id = r.id AND ur.user_id = ?",
       [user.id],
     );
 
