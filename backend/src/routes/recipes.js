@@ -1,15 +1,16 @@
-import { Hono } from "hono"
-import db from "../db.js"
+import { Hono } from "hono";
+import db from "../db.js";
 const app = new Hono();
 
-app.get('/', async (c) => {
-    try {
-        const user = c.get("user");
-        const { category, skip, take } = c.req.query();
+app.get("/", async (c) => {
+  try {
+    const user = c.get("user");
+    const { category, skip, take } = c.req.query();
 
-        console.log('Query parameters:', { category, skip, take });
+    console.log("Query parameters:", { category, skip, take });
 
-        const [rows] = await db.query(`
+    const [rows] = await db.query(
+      `
             SELECT DISTINCT r.*, AVG(urr.rating) AS avg_rating, urr.favourite, urr.last_cooked, urr.recipe_id
             FROM Recipe r
             LEFT JOIN RecipeIngredient ri ON r.id = ri.recipe_id
@@ -25,198 +26,223 @@ app.get('/', async (c) => {
                 WHERE ur2.user_id = ?
             )
             GROUP BY r.id, urr.favourite, urr.last_cooked, urr.recipe_id;
-        `, [user.id, user.id]);
+        `,
+      [user.id, user.id],
+    );
 
-        let recipesWithDetails = await Promise.all(rows.map(async (recipe) => {
-            const [ingredients] = await db.query(
-                'SELECT i.id, i.name, ri.quantity, ri.unit FROM Ingredient i, RecipeIngredient ri WHERE ri.ingredient_id = i.id AND ri.recipe_id = ?',
-                [recipe.id]
+    let recipesWithDetails = await Promise.all(
+      rows.map(async (recipe) => {
+        const [ingredients] = await db.query(
+          "SELECT i.id, i.name, ri.quantity, ri.unit FROM Ingredient i, RecipeIngredient ri WHERE ri.ingredient_id = i.id AND ri.recipe_id = ?",
+          [recipe.id],
+        );
+
+        const [rules] = await db.query(
+          "SELECT DISTINCT ir.rule_id FROM IngredientRule ir , recipeingredient ri WHERE ri.recipe_id = ? AND ir.ingredient_id = ri.ingredient_id",
+          [recipe.id],
+        );
+
+        const ingredientsWithFulfillment = await Promise.all(
+          ingredients.map(async (ingredient) => {
+            const [userIngredient] = await db.query(
+              "SELECT 1 FROM UserIngredient WHERE user_id = ? AND ingredient_id = ?",
+              [user.id, ingredient.id],
             );
-
-            const [rules] = await db.query(
-                'SELECT DISTINCT ir.rule_id FROM IngredientRule ir , recipeingredient ri WHERE ri.recipe_id = ? AND ir.ingredient_id = ri.ingredient_id',
-                [recipe.id]
-            );
-
-            const ingredientsWithFulfillment = await Promise.all(ingredients.map(async ingredient => {
-                const [userIngredient] = await db.query(
-                    'SELECT 1 FROM UserIngredient WHERE user_id = ? AND ingredient_id = ?',
-                    [user.id, ingredient.id]
-                );
-
-                return {
-                    id: ingredient.id,
-                    name: ingredient.name,
-                    quantity: ingredient.quantity,
-                    unit: ingredient.unit,
-                    fulfilled: userIngredient.length > 0
-                };
-            }));
 
             return {
-                ...recipe,
-                ingredients: ingredientsWithFulfillment,
-                rules: rules.map(rule => rule.rule_id),
+              id: ingredient.id,
+              name: ingredient.name,
+              quantity: ingredient.quantity,
+              unit: ingredient.unit,
+              fulfilled: userIngredient.length > 0,
             };
-        }));
+          }),
+        );
 
-        console.log('Recipes with details before sorting/filtering:', recipesWithDetails);
+        return {
+          ...recipe,
+          ingredients: ingredientsWithFulfillment,
+          rules: rules.map((rule) => rule.rule_id),
+        };
+      }),
+    );
 
-        if (category === 'recent') {
-            console.log('Sorting by recent');
-            recipesWithDetails = recipesWithDetails.sort((a, b) => new Date(b.last_cooked) - new Date(a.last_cooked));
-            console.log('Sorted by recent:', recipesWithDetails);
-        } else if (category === 'favourite') {
-            console.log('Filtering by favourite');
-            recipesWithDetails = recipesWithDetails.filter(recipe => recipe.favourite);
-            console.log('Filtered by favourite:', recipesWithDetails);
-        }
+    console.log(
+      "Recipes with details before sorting/filtering:",
+      recipesWithDetails,
+    );
 
-        if (skip) {
-            console.log('Applying skip:', skip);
-            recipesWithDetails = recipesWithDetails.slice(Number(skip));
-        }
-
-        if (take) {
-            console.log('Applying take:', take);
-            recipesWithDetails = recipesWithDetails.slice(0, Number(take));
-        }
-
-        return c.json({
-            success: true,
-            data: recipesWithDetails.map(recipe => ({
-                id: recipe.id,
-                name: recipe.name,
-                icon: recipe.icon,
-                video: recipe.video,
-                description: recipe.description,
-                instructions: recipe.instructions,
-                avg_rating: recipe.avg_rating,
-                rules: recipe.rules,
-                ingredients: recipe.ingredients,
-                times_cooked: recipe.times_cooked,
-                favourite: recipe.favourite,
-                last_cooked: recipe.last_cooked,
-            })),
-        });
-    } catch (err) {
-        console.error(err);
-        return c.json({ success: false, error: 'Error fetching recipes' }, 500);
+    if (category === "recent") {
+      console.log("Sorting by recent");
+      recipesWithDetails = recipesWithDetails.sort(
+        (a, b) => new Date(b.last_cooked) - new Date(a.last_cooked),
+      );
+      console.log("Sorted by recent:", recipesWithDetails);
+    } else if (category === "favourite") {
+      console.log("Filtering by favourite");
+      recipesWithDetails = recipesWithDetails.filter(
+        (recipe) => recipe.favourite,
+      );
+      console.log("Filtered by favourite:", recipesWithDetails);
     }
+
+    if (skip) {
+      console.log("Applying skip:", skip);
+      recipesWithDetails = recipesWithDetails.slice(Number(skip));
+    }
+
+    if (take) {
+      console.log("Applying take:", take);
+      recipesWithDetails = recipesWithDetails.slice(0, Number(take));
+    }
+
+    return c.json({
+      success: true,
+      data: recipesWithDetails.map((recipe) => ({
+        id: recipe.id,
+        name: recipe.name,
+        icon: recipe.icon,
+        video: recipe.video,
+        description: recipe.description,
+        instructions: recipe.instructions,
+        avg_rating: recipe.avg_rating,
+        rules: recipe.rules,
+        ingredients: recipe.ingredients,
+        times_cooked: recipe.times_cooked,
+        favourite: recipe.favourite,
+        last_cooked: recipe.last_cooked,
+      })),
+    });
+  } catch (err) {
+    console.error(err);
+    return c.json({ success: false, error: "Error fetching recipes" }, 500);
+  }
 });
 
-app.get('/:recipeId', async (c) => {
-    try {
-        const recipeId = c.req.param('recipeId');
-        const [rows] = await db.query(
-                `
+app.get("/:recipeId", async (c) => {
+  try {
+    const recipeId = c.req.param("recipeId");
+    const [rows] = await db.query(
+      `
             SELECT r.*, ur.favourite, ur.last_cooked, AVG(ur.rating) AS avg_rating
              FROM Recipe r
              LEFT JOIN UserRecipe ur ON r.id = ur.recipe_id
              WHERE r.id = ?
              GROUP BY r.id, ur.favourite, ur.last_cooked;`,
-            [recipeId]
-                );
-        if (rows.length === 0) {
-            return c.json({ success: false, error: 'Recipe not found' }, 404);
-        }
-
-        const recipe = rows[0];
-        const [ingredients] = await db.query(
-            'SELECT i.id, i.name, ri.quantity, ri.unit FROM Ingredient i, RecipeIngredient ri WHERE ri.ingredient_id = i.id AND ri.recipe_id = ?',
-            [recipeId]
-        );
-
-        return c.json({
-            success: true,
-            data: {
-                id: recipe.id,
-                name: recipe.name,
-                icon: recipe.icon,
-                video: recipe.video,
-                description: recipe.description,
-                instructions: recipe.instructions,
-                avg_rating: recipe.avg_rating,
-                ingredients: ingredients,
-                times_cooked: recipe.times_cooked,
-                favourite: recipe.favourite,
-                last_cooked: recipe.last_cooked,
-            },
-        });
-    } catch (err) {
-        console.error(err);
-        return c.json({ success: false, error: 'Error fetching recipe' }, 500);
+      [recipeId],
+    );
+    if (rows.length === 0) {
+      return c.json({ success: false, error: "Recipe not found" }, 404);
     }
+
+    const recipe = rows[0];
+    const [ingredients] = await db.query(
+      "SELECT i.id, i.name, ri.quantity, ri.unit FROM Ingredient i, RecipeIngredient ri WHERE ri.ingredient_id = i.id AND ri.recipe_id = ?",
+      [recipeId],
+    );
+
+    return c.json({
+      success: true,
+      data: {
+        id: recipe.id,
+        name: recipe.name,
+        icon: recipe.icon,
+        video: recipe.video,
+        description: recipe.description,
+        instructions: recipe.instructions,
+        avg_rating: recipe.avg_rating,
+        ingredients: ingredients,
+        times_cooked: recipe.times_cooked,
+        favourite: recipe.favourite,
+        last_cooked: recipe.last_cooked,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    return c.json({ success: false, error: "Error fetching recipe" }, 500);
+  }
 });
 
-app.post('/:recipeId/cooked', async (c) => {
-    try {
-        const userId = c.get('user')["id"];
-        const recipeId = c.req.param('recipeId');
+app.post("/:recipeId/cooked", async (c) => {
+  try {
+    const userId = c.get("user")["id"];
+    const recipeId = c.req.param("recipeId");
 
-        await db.query('UPDATE Recipe SET times_cooked = times_cooked + 1 WHERE id = ?', [recipeId]);
+    await db.query(
+      "UPDATE Recipe SET times_cooked = times_cooked + 1 WHERE id = ?",
+      [recipeId],
+    );
 
-        await db.query(
-            'UPDATE UserRecipe SET last_cooked = CURRENT_TIMESTAMP WHERE user_id = ? AND recipe_id = ?',
-            [userId,recipeId]
-        );
+    await db.query(
+      "UPDATE UserRecipe SET last_cooked = CURRENT_TIMESTAMP WHERE user_id = ? AND recipe_id = ?",
+      [userId, recipeId],
+    );
 
-        return c.json({ success: true });
-    } catch (err) {
-        console.error(err);
-        return c.json({ success: false, error: 'Error recording recipe cooked' }, 500);
-    }
+    return c.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    return c.json(
+      { success: false, error: "Error recording recipe cooked" },
+      500,
+    );
+  }
 });
 
-app.put('/:recipeId/favourite', async (c) => {
-    try {
-        const userId = c.get('user')['id'];
-        const recipeId = c.req.param('recipeId');
-        const { favourite } = await c.req.json();
+app.put("/:recipeId/favourite", async (c) => {
+  try {
+    const userId = c.get("user")["id"];
+    const recipeId = c.req.param("recipeId");
+    const { favourite } = await c.req.json();
 
-        if (typeof favourite !== 'boolean') {
-            return c.json({ success: false, error: 'Invalid favourite value' }, 400);
-        }
-
-        if (favourite) {
-            await db.query(
-                'INSERT INTO UserRecipe (user_id, recipe_id, favourite) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE favourite = 1',
-                [userId, recipeId]
-            );
-        } else {
-            await db.query(
-                'UPDATE UserRecipe SET favourite = 0 WHERE user_id = ? AND recipe_id = ?',
-                [userId, recipeId]
-            );
-        }
-
-        return c.json({ success: true });
-    } catch (err) {
-        console.error(err);
-        return c.json({ success: false, error: 'Error updating favourite status' }, 500);
+    if (typeof favourite !== "boolean") {
+      return c.json({ success: false, error: "Invalid favourite value" }, 400);
     }
+
+    if (favourite) {
+      await db.query(
+        "INSERT INTO UserRecipe (user_id, recipe_id, favourite) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE favourite = 1",
+        [userId, recipeId],
+      );
+    } else {
+      await db.query(
+        "UPDATE UserRecipe SET favourite = 0 WHERE user_id = ? AND recipe_id = ?",
+        [userId, recipeId],
+      );
+    }
+
+    return c.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    return c.json(
+      { success: false, error: "Error updating favourite status" },
+      500,
+    );
+  }
 });
 
-app.put('/:recipeId/rating', async (c) => {
-    try {
-        const userId = c.get('user')['id'];
-        const recipeId = c.req.param('recipeId');
-        const { rating } = await c.req.json();
+app.put("/:recipeId/rating", async (c) => {
+  try {
+    const userId = c.get("user")["id"];
+    const recipeId = c.req.param("recipeId");
+    const { rating } = await c.req.json();
 
-        if (rating < 1 || rating > 10 || !Number.isInteger(rating)) {
-            return c.json({ success: false, error: 'Rating must be an integer between 1 and 10' }, 400);
-        }
-
-        await db.query(
-            'INSERT INTO UserRecipe (user_id, recipe_id, rating) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE rating = ?',
-            [userId, recipeId, rating, rating]
-        );
-
-        return c.json({ success: true });
-    } catch (err) {
-        console.error(err);
-        return c.json({ success: false, error: 'Error submitting rating' }, 500);
+    if (rating < 1 || rating > 10 || !Number.isInteger(rating)) {
+      return c.json(
+        { success: false, error: "Rating must be an integer between 1 and 10" },
+        400,
+      );
     }
+
+    await db.query(
+      "INSERT INTO UserRecipe (user_id, recipe_id, rating) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE rating = ?",
+      [userId, recipeId, rating, rating],
+    );
+
+    return c.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    return c.json({ success: false, error: "Error submitting rating" }, 500);
+  }
 });
 
 export default app;
