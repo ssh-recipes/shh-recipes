@@ -7,9 +7,7 @@ const videoHeight = windowWidth * 9 / 16;
 const timeOffset = 300 //300 miliseconds to fix errors with current stage
 
 export default function RecipePage({ route }) {
-  const { recipeId } = route.params;
-  const recipe = recipeId;
-
+  const { recipe } = route.params;
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStage, setCurrentStage] = useState(-1);
   const [currentTime, setCurrentTime] = useState(0);
@@ -19,6 +17,7 @@ export default function RecipePage({ route }) {
   const videoRef = useRef(null);
   const elementPositions = useRef([]);
 
+  // this effect is for fixing audio on IOS
   useEffect(() => {
     const enableAudio = async () => {
       try {
@@ -37,14 +36,16 @@ export default function RecipePage({ route }) {
     enableAudio();
   }, []);
 
+  //updates current time and fixes ios audio issue
   const handlePlaybackStatusUpdate = (status) => {
     setIsPlaying(status.isPlaying);
 
     if (status.isLoaded) {
-      setCurrentTime(status.positionMillis / 1000); // Convert to seconds
+      setCurrentTime(status.positionMillis / 1000);
     }
   };
 
+  // to show alert with 2 questions
   const showAlert = async (question, onYes = undefined, onNo = undefined) => {
     if (Platform.OS === 'web') {
       const responce = confirm(question);
@@ -84,6 +85,7 @@ export default function RecipePage({ route }) {
     }
   }
 
+  //to show alert with one question
   const showMessage = (message) => {
     if (Platform.OS === 'web') {
       alert(message);
@@ -101,6 +103,7 @@ export default function RecipePage({ route }) {
     }
   }
 
+  //starts/stops a video on isPlaying. Fixes IOS audio
   const handlePlayPause = async () => {
     if (videoRef.current && isPlaying) {
       await videoRef.current.playAsync();
@@ -135,11 +138,13 @@ export default function RecipePage({ route }) {
     }
   }, [currentStage]);
 
+  // measures offset before the steps
   const measureAboveSteps = (event) => {
     const { height } = event.nativeEvent.layout;
     setOffsetAboveSteps(height);
   };
 
+  //gets positions of an element
   const handleLayout = (event, index) => {
     const { y } = event.nativeEvent.layout;
     elementPositions.current[index] = y;
@@ -154,6 +159,7 @@ export default function RecipePage({ route }) {
     }
   };
 
+  //scrolls View and Video to the next/previous stage
   const goToStage = async (stageIndex) => {
     if (stageIndex < 0) {
       setCurrentStage(-1);
@@ -196,12 +202,12 @@ export default function RecipePage({ route }) {
       </TouchableOpacity>
       <ScrollView ref={scrollRef} style={styles.scrollableContent}>
         <View onLayout={measureAboveSteps}>
-          <Text style={styles.title}>{recipe.title}</Text>
+          <Text style={styles.title}>{recipe.name}</Text>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Ingredients</Text>
             {recipe.ingredients.map((ingredient, index) => (
               <Text key={index} style={styles.listItem}>
-                - {ingredient}
+                - {ingredient.name} {ingredient.quantity} {ingredient.unit !== "quantity" ? ingredient.unit : ""}
               </Text>
             ))}
           </View>

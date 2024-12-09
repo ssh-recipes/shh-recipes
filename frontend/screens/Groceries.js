@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 export default function Groceries() {
   return (
     <View style={styles.container}>
-      <Text>Groceries Screen</Text>
+      <Text>Groceries Screen. This page is not a part of our prototype</Text>
       <StatusBar style="auto" />
     </View>
   );

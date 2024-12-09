@@ -1,11 +1,9 @@
-import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 
-export default function Home() {
+export default function ErrorPage() {
   return (
     <View style={styles.container}>
-      <Text>This Screen is not a part of this prototype</Text>
-      <StatusBar style="auto" />
+      <Text>An error occured</Text>
     </View>
   );
 }
