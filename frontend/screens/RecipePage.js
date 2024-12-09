@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Platform, Alert } from "react-native";
 import { Audio, Video, ResizeMode } from "expo-av";
 
-const windowWidth = Dimensions.get("window").width;
-const videoHeight = windowWidth * 9 / 16;
 const timeOffset = 300 //300 miliseconds to fix errors with current stage
 
 export default function RecipePage({ route }) {
@@ -187,6 +185,11 @@ export default function RecipePage({ route }) {
         useNativeControls
         style={styles.video}
         onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+        onReadyForDisplay={videoData => {
+          if (Platform.OS === 'web') {
+            videoData.srcElement.style.position = "initial";
+          }
+        }}
       />
       <TouchableOpacity
         onPress={() => goToStage(currentStage - 1)}
@@ -239,12 +242,14 @@ const styles = StyleSheet.create({
   },
   video: {
     width: "100%",
-    height: videoHeight,
+    // height: videoHeight,
     backgroundColor: "black",
+    aspectRatio: 16 / 9,
   },
   scrollableContent: {
     flex: 1,
     padding: 10,
+    paddingBottom: 50,
   },
   title: {
     fontSize: 24,
@@ -267,21 +272,21 @@ const styles = StyleSheet.create({
   stepContainer: {
     padding: 10,
     marginBottom: 10,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#f0fff0",
     borderRadius: 5,
   },
   stepText: {
     fontSize: 16,
   },
   highlightedStep: {
-    backgroundColor: "#FFEB3B",
+    backgroundColor: "#FFB23F",
   },
   navButton: {
     position: "absolute",
     bottom: 20,
     width: 60,
     height: 60,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(30, 90, 10, 0.25)",
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
@@ -294,7 +299,7 @@ const styles = StyleSheet.create({
     right: 20,
   },
   navButtonText: {
-    color: "#fff",
+    color: "#000",
     fontSize: 30,
     fontWeight: "bold",
   },
