@@ -181,6 +181,11 @@ app.post("/:recipeId/cooked", async (c) => {
       [userId, recipeId],
     );
 
+    await db.query(
+      "INSERT INTO UserRecipe (user_id, recipe_id, favourite, last_cooked, rating) VALUES (?, ?, 0, NOW(), null) ON DUPLICATE KEY UPDATE last_cooked=NOW()",
+      [userId, recipeId],
+    );
+
     return c.json({ success: true });
   } catch (err) {
     console.error(err);
@@ -202,10 +207,10 @@ app.put("/:recipeId/favourite", async (c) => {
     }
 
     if (favourite) {
-      await db.query(
-        "INSERT INTO UserRecipe (user_id, recipe_id, favourite) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE favourite = 1",
-        [userId, recipeId],
-      );
+	await db.query(
+	  "INSERT INTO UserRecipe (user_id, recipe_id, favourite, last_cooked, rating) VALUES (?, ?, 1, null, null) ON DUPLICATE KEY UPDATE favourite=1",
+	  [userId, recipeId],
+	);
     } else {
       await db.query(
         "UPDATE UserRecipe SET favourite = 0 WHERE user_id = ? AND recipe_id = ?",
@@ -236,10 +241,10 @@ app.put("/:recipeId/rating", async (c) => {
       );
     }
 
-    await db.query(
-      "INSERT INTO UserRecipe (user_id, recipe_id, rating) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE rating = ?",
-      [userId, recipeId, rating, rating],
-    );
+	await db.query(
+	  "INSERT INTO UserRecipe (user_id, recipe_id, favourite, last_cooked, rating) VALUES (?, ?, 1, null, ?) ON DUPLICATE KEY UPDATE rating=?",
+	  [userId, recipeId, rating, rating],
+	);
 
     return c.json({ success: true });
   } catch (err) {
