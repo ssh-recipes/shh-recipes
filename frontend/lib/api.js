@@ -266,9 +266,3 @@ export const recordRecipeCooked = async (recipeId) => {
 		"success": true,
 	}
 }
-
-export const startCookingRecipe = async (recipeId) => {
-	return {
-		"success": true,
-	}
-}

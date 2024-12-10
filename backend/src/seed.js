@@ -126,12 +126,12 @@ const seed = async () => {
 
   await db.query(`
         INSERT INTO Recipe (id, name, icon, video, description, steps, times_cooked)
-        VALUES ('cheese_omellete', 'Cheese Omelette', 'cheese_omelette', 'pfXVx9xYXlE', 'A delicious cheese omelette.', '[]', 0)
+        VALUES ('cheese_omellete', 'Cheese Omelette', 'cheese_omelette', 'pfXVx9xYXlE', 'A delicious cheese omelette.', '[{ "text": "lorem ipsum", "timestamp": 0 }]', 0)
     `);
 
   await db.query(`
         INSERT INTO Recipe (id, name, icon, video, description, steps, times_cooked)
-        VALUES ('carrot_salad', 'Carrot Salad', 'carrot_salad.png', '48apTozJfo4', 'A healthy carrot salad.', '[]', 0)
+        VALUES ('carrot_salad', 'Carrot Salad', 'carrot_salad.png', '48apTozJfo4', 'A healthy carrot salad.', '[{ "text": "lorem ipsum", "timestamp": 0 }]', 0)
     `);
 
   await db.query(`
