@@ -177,10 +177,9 @@ app.post("/:recipeId/cooked", async (c) => {
     );
 
     await db.query(
-	"INSERT INTO UserRecipe (user_id, recipe_id, favourite, last_cooked, rating) VALUES (?, ?, 0, NOW(), null) ON DUPLICATE KEY UPDATE last_cooked=NOW()",
-	[userId, recipeId]
-
-    )
+      "UPDATE UserRecipe SET last_cooked = CURRENT_TIMESTAMP WHERE user_id = ? AND recipe_id = ?",
+      [userId, recipeId],
+    );
 
     return c.json({ success: true });
   } catch (err) {
