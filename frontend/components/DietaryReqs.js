@@ -1,33 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
-import { Modal } from 'react-native';
-import { getRules, getUser, setIsRuleEnabled } from '../lib/api';
+import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import { Modal } from "react-native";
+import { getRules, getUser, setIsRuleEnabled } from "../lib/api";
 
-export default function DietaryReqs({isFilterVisible, setFilterVisible}) {
+export default function DietaryReqs({
+  isFilterVisible,
+  setFilterVisible,
+  setReloadData,
+}) {
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [filters, setFilters] = useState([]);
 
   const toggleFilter = async (filter) => {
-    if (selectedFilters.some(selFilter => selFilter === filter.id)) {
+    if (selectedFilters.some((selFilter) => selFilter === filter.id)) {
       setSelectedFilters(selectedFilters.filter((item) => item !== filter.id));
 
-      const response = await setIsRuleEnabled(filter.id, true);
+      const response = await setIsRuleEnabled(filter.id, false);
       if (!response || response.success === false) {
         console.error("Error: setIsRuleEnabled " + response.success);
       }
     } else {
       setSelectedFilters([...selectedFilters, filter.id]);
 
-      const response = await setIsRuleEnabled(filter.id, false);
+      const response = await setIsRuleEnabled(filter.id, true);
       if (!response || response.success === false) {
         console.error("Error: setIsRuleEnabled " + response.success);
       }
     }
+    setReloadData(true);
   };
 
   useEffect(() => {
     fetchUserFilters();
-  }, [])
+  }, []);
 
   //get filters from backend
   const fetchUserFilters = async () => {
@@ -41,7 +52,7 @@ export default function DietaryReqs({isFilterVisible, setFilterVisible}) {
         console.error("Error: Fetch rules in DietaryReqs.");
         setSelectedFilters([]);
       }
-  
+
       if (fRules && fRules.success) {
         setFilters(fRules.data);
       } else {
@@ -51,109 +62,117 @@ export default function DietaryReqs({isFilterVisible, setFilterVisible}) {
     } catch (error) {
       console.error("Error fetching rules:", error);
     }
-  }
+  };
 
   return (
     <Modal
-        visible={isFilterVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => {setFilterVisible(false)}}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Filters</Text>
-            <ScrollView style={styles.scrollViewModal}>
-              {filters.map((filter, index) => (
-                <TouchableOpacity
-                  key={index}
+      visible={isFilterVisible}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={() => {
+        setFilterVisible(false);
+      }}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Select Filters</Text>
+          <ScrollView style={styles.scrollViewModal}>
+            {filters.map((filter, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.filterButton,
+                  selectedFilters.some(
+                    (selFilter) => selFilter === filter.id,
+                  ) && styles.filterButtonActive,
+                ]}
+                onPress={() => toggleFilter(filter)}
+              >
+                <Text
                   style={[
-                    styles.filterButton,
-                    selectedFilters.some(selFilter => selFilter === filter.id) && styles.filterButtonActive,
+                    styles.filterText,
+                    selectedFilters.some(
+                      (selFilter) => selFilter === filter.id,
+                    ) && styles.filterTextActive,
                   ]}
-                  onPress={() => toggleFilter(filter)}
                 >
-                  <Text
-                    style={[
-                      styles.filterText,
-                      selectedFilters.some(selFilter => selFilter === filter.id) && styles.filterTextActive,
-                    ]}
-                  >
-                    {filter.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-            <TouchableOpacity
-              style={styles.modalCloseButton}
-              onPress={() => {setFilterVisible(false)}}
-            >
-              <Text style={styles.modalCloseButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
+                  {filter.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+          <TouchableOpacity
+            style={styles.modalCloseButton}
+            onPress={() => {
+              setFilterVisible(false);
+            }}
+          >
+            <Text style={styles.modalCloseButtonText}>Close</Text>
+          </TouchableOpacity>
         </View>
-      </Modal>
+      </View>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
   filterButton: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 5,
     paddingVertical: 10,
     paddingHorizontal: 15,
     marginHorizontal: 10,
     marginBottom: 10,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.5,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     elevation: 4, // Android shadows
-    alignItems: 'center',
+    alignItems: "center",
   },
   filterButtonActive: {
     backgroundColor: "#FFB23F",
   },
   filterText: {
-    color: '#000',
+    color: "#000",
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   filterTextActive: {
-    color: '#000',
+    color: "#000",
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
   },
   modalContent: {
     width: 300,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 20,
     borderRadius: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
   },
   scrollViewModal: {
     maxHeight: 300,
-    width: '100%',
+    width: "100%",
   },
   modalCloseButton: {
-    backgroundColor: '#148B4E',
+    backgroundColor: "#148B4E",
     borderRadius: 25,
     paddingVertical: 12,
     paddingHorizontal: 20,
     marginTop: 20,
-    width: '80%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
+    width: "80%",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
     shadowOpacity: 0.3,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 6,
@@ -161,8 +180,8 @@ const styles = StyleSheet.create({
   },
   modalCloseButtonText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
+    fontWeight: "bold",
+    color: "#fff",
+    textAlign: "center",
   },
 });
