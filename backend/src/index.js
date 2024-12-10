@@ -3,7 +3,7 @@ config({ path: ".env.local" });
 
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { cors } from 'hono/cors'
+import { cors } from "hono/cors";
 import { createMiddleware } from "hono/factory";
 import { serveStatic } from "@hono/node-server/serve-static";
 

@@ -1,9 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Platform,
+  Alert,
+} from "react-native";
 import { Audio, Video, ResizeMode } from "expo-av";
 import { startCookingRecipe } from "../lib/api";
 
-const timeOffset = 300 //300 miliseconds to fix errors with current stage
+const timeOffset = 300; //300 miliseconds to fix errors with current stage
 
 export default function RecipePage({ route }) {
   const { recipe } = route.params;
@@ -65,25 +73,25 @@ export default function RecipePage({ route }) {
         [
           {
             text: "Yes",
-            onPress: () => { 
+            onPress: () => {
               if (onYes) {
                 onYes();
               }
-            }
+            },
           },
           {
             text: "No",
-            onPress: () => { 
+            onPress: () => {
               if (onNo) {
                 onNo();
               }
-            }
+            },
           },
         ],
-        { cancelable: false }
+        { cancelable: false },
       );
     }
-  }
+  };
 
   //to show alert with one question
   const showMessage = (message, action = undefined) => {
@@ -96,33 +104,30 @@ export default function RecipePage({ route }) {
         [
           {
             text: "Close",
-            onPress: () => { 
+            onPress: () => {
               if (action) {
                 action();
               }
-            }
+            },
           },
         ],
-        { cancelable: false }
+        { cancelable: false },
       );
     }
-  }
+  };
 
   const onStartCooking = async () => {
     setRecipeStarted(true);
-    showAlert(
-      "Would you like to book the kitchen for 35 minutes?",
-      () => {
-        // here should be api call to booking system
-        showMessage("The kitchen has been booked for you for 35 minutes.");
-      }
-    );
+    showAlert("Would you like to book the kitchen for 35 minutes?", () => {
+      // here should be api call to booking system
+      showMessage("The kitchen has been booked for you for 35 minutes.");
+    });
     const responce = await startCookingRecipe();
     if (!responce || responce.success === false) {
       console.error("Error: could not startCookingRecipe");
     }
     setIsPlaying(true);
-  }
+  };
 
   //starts/stops a video on isPlaying. Fixes IOS audio
   const handlePlayPause = async () => {
@@ -139,7 +144,7 @@ export default function RecipePage({ route }) {
     const nextStageIndex = recipe.steps.findIndex(
       (step, index) =>
         currentTime >= step.timestamp &&
-        currentTime < (recipe.steps[index + 1]?.timestamp || Infinity)
+        currentTime < (recipe.steps[index + 1]?.timestamp || Infinity),
     );
 
     if (
@@ -193,7 +198,9 @@ export default function RecipePage({ route }) {
     } else {
       setCurrentStage(stageIndex);
       if (videoRef.current) {
-        await videoRef.current.setPositionAsync(recipe.steps[stageIndex].timestamp * 1000 + timeOffset);
+        await videoRef.current.setPositionAsync(
+          recipe.steps[stageIndex].timestamp * 1000 + timeOffset,
+        );
       }
       scrollToElement(stageIndex);
     }
@@ -208,7 +215,7 @@ export default function RecipePage({ route }) {
         useNativeControls
         style={styles.video}
         onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-        onReadyForDisplay={videoData => {
+        onReadyForDisplay={(videoData) => {
           if (Platform.OS === "web") {
             videoData.srcElement.style.position = "initial";
           }
@@ -232,17 +239,21 @@ export default function RecipePage({ route }) {
         <View onLayout={measureAboveSteps}>
           <View style={styles.startContainer}>
             <Text style={styles.title}>{recipe.name}</Text>
-            {( !recipeStarted &&
-            <TouchableOpacity style={styles.startButton} onPress={() => onStartCooking()}>
-              <Text style={styles.startButtonText}>Start Cooking</Text>
-            </TouchableOpacity>
+            {!recipeStarted && (
+              <TouchableOpacity
+                style={styles.startButton}
+                onPress={() => onStartCooking()}
+              >
+                <Text style={styles.startButtonText}>Start Cooking</Text>
+              </TouchableOpacity>
             )}
           </View>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Ingredients</Text>
             {recipe.ingredients.map((ingredient, index) => (
               <Text key={index} style={styles.listItem}>
-                - {ingredient.name} {ingredient.quantity} {ingredient.unit !== "quantity" ? ingredient.unit : ""}
+                - {ingredient.name} {ingredient.quantity}{" "}
+                {ingredient.unit !== "quantity" ? ingredient.unit : ""}
               </Text>
             ))}
           </View>
@@ -265,7 +276,7 @@ export default function RecipePage({ route }) {
       </ScrollView>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -324,9 +335,9 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   startContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     // padding: 10,
     // margin: 10,
   },

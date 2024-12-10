@@ -33,8 +33,6 @@ export const getUser = async () => {
   }
 };
 
-
-
 export const getRules = async () => {
   try {
     const response = await fetch(process.env.EXPO_PUBLIC_API_URL + "/rules", {
@@ -188,5 +186,5 @@ export const recordRecipeCooked = async (recipeId) => {
 };
 
 export const getStaticResource = async (resource) => {
-    return "${process.env.EXPO_PUBLIC_API_URL}/static/" + resource
-}
+  return "${process.env.EXPO_PUBLIC_API_URL}/static/" + resource;
+};
