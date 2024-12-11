@@ -7,6 +7,7 @@ import {
   Recipes,
   RecipePage,
   ErrorPage,
+  Timetable
 } from "./screens/index";
 
 const Drawer = createDrawerNavigator();
@@ -49,6 +50,7 @@ export default function App() {
           options={{ drawerItemStyle: { display: "none" } }}
         />
         <Drawer.Screen name="Groceries" component={Groceries} />
+        <Drawer.Screen name="Timetable" component={Timetable} />
       </Drawer.Navigator>
     </NavigationContainer>
   );

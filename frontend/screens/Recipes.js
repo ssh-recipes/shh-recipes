@@ -10,11 +10,24 @@ import {
 import { DietaryReqs, RecipeCard } from "../components";
 import { getRecipes } from "../lib/api";
 
-const sortFilters = ["Recommended", "Recent", "Favourites"];
+const sortFilters = [
+  {
+    id: "recommended",
+    name: "Recommended"
+  },
+  {
+    id: "recent",
+    name: "Recent"
+  },
+  {
+    id: "favourite",
+    name: "Favourites"
+  }
+];
 
 export default function Recipes({ navigation }) {
   const [isDietaryFilterVisible, setDietaryFilterVisible] = useState(false);
-  const [selectedSortFilter, setSelectedSortFilter] = useState("Recommended");
+  const [selectedSortFilter, setSelectedSortFilter] = useState(sortFilters[0]);
   const [recipes, setRecipes] = useState([]);
   const [reloadData, setReloadData] = useState(false);
 
@@ -40,7 +53,7 @@ export default function Recipes({ navigation }) {
 
   const fetchRecipes = async () => {
     try {
-      const fRecipes = await getRecipes("recent", 0, 20);
+      const fRecipes = await getRecipes(selectedSortFilter.id, 0, 20);
 
       if (fRecipes && fRecipes.success) {
         setRecipes(fRecipes.data);
@@ -73,17 +86,17 @@ export default function Recipes({ navigation }) {
               key={index}
               style={[
                 styles.filterButton,
-                selectedSortFilter === filter && styles.filterButtonActive, // Apply active style based on selected filter
+                selectedSortFilter.id === filter.id && styles.filterButtonActive, // Apply active style based on selected filter
               ]}
               onPress={() => selectSortFilter(filter)}
             >
               <Text
                 style={[
                   styles.filterText,
-                  selectedSortFilter === filter && styles.filterTextActive, // Apply active text style based on selected filter
+                  selectedSortFilter.id === filter.id && styles.filterTextActive, // Apply active text style based on selected filter
                 ]}
               >
-                {filter}
+                {filter.name}
               </Text>
             </TouchableOpacity>
           ))}

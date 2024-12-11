@@ -118,6 +118,17 @@ export default function RecipePage({ route }) {
 
   const onStartCooking = async () => {
     setRecipeStarted(true);
+    const notAvailable = recipe.ingredients.filter(ingredient => !ingredient.fulfilled);
+    if (notAvailable > 0) {
+      showAlert("Would you like to purchase not available ingredients from SSH - Groceries", () => {
+        // here should be api call to booking system
+        showMessage("Ingredients has been purchased");
+      });
+      const responce = await recordRecipeCooked(recipe.id);
+      if (!responce || responce.success === false) {
+        console.error("Error: could not startCookingRecipe");
+      }
+    }
     showAlert("Would you like to book the kitchen for 35 minutes?", () => {
       // here should be api call to booking system
       showMessage("The kitchen has been booked for you for 35 minutes.");
