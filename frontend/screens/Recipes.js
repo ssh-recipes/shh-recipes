@@ -129,6 +129,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+    maxWidth: '65vh',
+    width: '100%',
+    justifyContent: 'center',
+    // alignItems: 'center',
+    marginHorizontal: 'auto',
   },
   mainContainer: {
     flex: 1,
