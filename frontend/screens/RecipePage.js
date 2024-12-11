@@ -161,10 +161,12 @@ export default function RecipePage({ route }) {
     if (
       nextStageIndex !== -1 &&
       nextStageIndex !== currentStage &&
-      currentTime >= recipe.steps[0].timestamp
+      // currentTime >= recipe.steps[0].timestamp
+      currentTime >= 0
     ) {
       setCurrentStage(nextStageIndex);
-    } else if (currentTime < recipe.steps[0].timestamp) {
+    } else if (currentTime < 0) {
+    // } else if (currentTime < recipe.steps[0].timestamp) {
       setCurrentStage(-1);
     }
   }, [currentTime]);

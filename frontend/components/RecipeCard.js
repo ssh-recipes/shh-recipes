@@ -13,8 +13,13 @@ import { getRecipe, setIsRecipeFavourite, getStaticResource } from "../lib/api";
 const primaryFontSize = 16;
 const secondaryFontSize = 14;
 
-export default function RecipeCard({ navigation, recipe }) {
+export default function RecipeCard({ navigation, recipe, filters }) {
   const [isfavourite, setFavourite] = useState(recipe.favourite);
+
+  const findFilterName = (id) => {
+    const filter = filters.find(filter => filter.id === id);
+    return filter ? filter.name : "";
+  }
 
   //change isFavourite and send to backend
   const toggleFavourite = async () => {
@@ -88,7 +93,7 @@ export default function RecipeCard({ navigation, recipe }) {
             recipe.rules.length > 0 &&
             recipe.rules.map((filter, index) => (
               <React.Fragment key={index}>
-                <Text style={styles.filterBadge}>{filter}</Text>
+                <Text style={styles.filterBadge}>{findFilterName(filter)}</Text>
                 {index < recipe.rules.length - 1 && (
                   <View style={styles.circle} />
                 )}

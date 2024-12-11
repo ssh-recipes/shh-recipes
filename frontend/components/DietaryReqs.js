@@ -7,15 +7,15 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Modal } from "react-native";
-import { getRules, getUser, setIsRuleEnabled } from "../lib/api";
+import { getUser, setIsRuleEnabled } from "../lib/api";
 
 export default function DietaryReqs({
-  isFilterVisible,
-  setFilterVisible,
-  setReloadData,
-}) {
+    isFilterVisible,
+    setFilterVisible,
+    setReloadData,
+    filters
+  }) {
   const [selectedFilters, setSelectedFilters] = useState([]);
-  const [filters, setFilters] = useState([]);
 
   const toggleFilter = async (filter) => {
     if (selectedFilters.some((selFilter) => selFilter === filter.id)) {
@@ -43,7 +43,6 @@ export default function DietaryReqs({
   //get filters from backend
   const fetchUserFilters = async () => {
     try {
-      const fRules = await getRules();
       const fUser = await getUser();
 
       if (fUser && fUser.success) {
@@ -51,13 +50,6 @@ export default function DietaryReqs({
       } else {
         console.error("Error: Fetch rules in DietaryReqs.");
         setSelectedFilters([]);
-      }
-
-      if (fRules && fRules.success) {
-        setFilters(fRules.data);
-      } else {
-        console.error("Error: Fetch recipe in DietaryReqs.");
-        setFilters([]);
       }
     } catch (error) {
       console.error("Error fetching rules:", error);
