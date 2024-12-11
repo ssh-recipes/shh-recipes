@@ -59,7 +59,7 @@ app.get("/", async (c) => {
         const ingredientsWithFulfillment = await Promise.all(
           ingredients.map(async (ingredient) => {
             const [userIngredient] = await db.query(
-              "SELECT 1 FROM UserIngredient WHERE user_id = ? AND ingredient_id = ?",
+              "SELECT quantity FROM UserIngredient WHERE user_id = ? AND ingredient_id = ?",
               [user.id, ingredient.id],
             );
 
@@ -68,11 +68,11 @@ app.get("/", async (c) => {
               name: ingredient.name,
               quantity: ingredient.quantity,
               unit: ingredient.unit,
-              fulfilled: userIngredient.length > 0,
+              fulfilled: userIngredient.length > 0 && userIngredient[0].quantity >= ingredient.quantity,
             };
           }),
         );
-
+        
         return {
           ...recipe,
           ingredients: ingredientsWithFulfillment,
@@ -124,6 +124,7 @@ app.get("/", async (c) => {
 
 app.get("/:recipeId", async (c) => {
   try {
+    const user = c.get("user");
     const recipeId = c.req.param("recipeId");
     const [rows] = await db.query(
       `
@@ -144,6 +145,20 @@ app.get("/:recipeId", async (c) => {
       [recipeId],
     );
 
+    const ingredientsWithFulfillment = await Promise.all(
+      ingredients.map(async (ingredient) => {
+        const [userIngredient] = await db.query(
+          "SELECT quantity FROM UserIngredient WHERE user_id = ? AND ingredient_id = ?",
+          [user.id, ingredient.id],
+        );
+    
+        return {
+          ...ingredient,
+          fulfilled: userIngredient.length > 0 && userIngredient[0].quantity >= ingredient.quantity,
+        };
+      }),
+    );
+
     return c.json({
       success: true,
       data: {
@@ -154,7 +169,7 @@ app.get("/:recipeId", async (c) => {
         description: recipe.description,
         steps: recipe.steps ? JSON.parse(recipe.steps) : [],
         avg_rating: recipe.avg_rating ? Number(recipe.avg_rating) : null,
-        ingredients: ingredients,
+        ingredients: ingredientsWithFulfillment,
         times_cooked: recipe.times_cooked,
         favourite: recipe.favourite == 1 ? true : false,
         last_cooked: recipe.last_cooked,
