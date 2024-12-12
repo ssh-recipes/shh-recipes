@@ -8,10 +8,7 @@ const calculateRecommendationScore = (recipe, userIngredients) => {
   score += recipe.times_cooked * 2;
 
   const allIngredientsFulfilled = recipe.ingredients.every((ingredient) =>
-    userIngredients.some(
-      (userIngredient) =>
-        userIngredient.id === ingredient.id && userIngredient.fulfilled,
-    ),
+	ingredient.fulfilled
   );
 
   if (allIngredientsFulfilled) score += 30;
@@ -80,6 +77,8 @@ app.get("/", async (c) => {
         };
       }),
     );
+
+
 
     if (category === "recent") {
       recipesWithDetails = recipesWithDetails.sort(
