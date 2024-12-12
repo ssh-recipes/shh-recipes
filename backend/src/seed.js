@@ -48,7 +48,7 @@ const seed = async () => {
             icon VARCHAR(255) NOT NULL,
             video VARCHAR(255),
             description TEXT,
-            instructions TEXT,
+            steps TEXT,
             times_cooked INT
         )
     `);
@@ -146,28 +146,28 @@ const seed = async () => {
   `);
 
   await db.query(`
-        INSERT INTO Recipe (id, name, icon, video, description, instructions, times_cooked)
-        VALUES ('cheese_omellete', 'Cheese Omelette', 'cheese_omelette', 'pfXVx9xYXlE', 'A delicious cheese omelette.', 'Whisk eggs and add cheese.', 0)
+        INSERT INTO Recipe (id, name, icon, video, description, steps, times_cooked)
+        VALUES ('cheese_omellete', 'Cheese Omelette', 'cheese_omelette', 'pfXVx9xYXlE', 'A delicious cheese omelette.', '[{ "text": "lorem ipsum", "timestamp": 0 }]', 0)
     `);
 
   await db.query(`
-        INSERT INTO Recipe (id, name, icon, video, description, instructions, times_cooked)
-        VALUES ('carrot_salad', 'Carrot Salad', 'carrot_salad.png', '48apTozJfo4', 'A healthy carrot salad.', 'Grate carrots and add dressing.', 0)
+        INSERT INTO Recipe (id, name, icon, video, description, steps, times_cooked)
+        VALUES ('carrot_salad', 'Carrot Salad', 'carrot_salad.png', '48apTozJfo4', 'A healthy carrot salad.', '[{ "text": "lorem ipsum", "timestamp": 0 }]', 0)
     `);
 
   await db.query(`
-        INSERT INTO Recipe (id, name, icon, video, description, instructions, times_cooked)
-        VALUES ('pasta_primavera', 'Pasta Primavera', 'pasta_primavera.png', 'abcd1234', 'A fresh pasta dish with vegetables.', 'Cook pasta and mix with vegetables.', 0)
+        INSERT INTO Recipe (id, name, icon, video, description, steps, times_cooked)
+        VALUES ('pasta_primavera', 'Pasta Primavera', 'pasta_primavera.png', 'abcd1234', 'A fresh pasta dish with vegetables.', '[{ "text": "lorem ipsum", "timestamp": 0 }]', 0)
     `);
 
   await db.query(`
-        INSERT INTO Recipe (id, name, icon, video, description, instructions, times_cooked)
-        VALUES ('tomato_soup', 'Tomato Soup', 'tomato_soup.png', 'efgh5678', 'A warm tomato soup.', 'Cook tomatoes and blend.', 0)
+        INSERT INTO Recipe (id, name, icon, video, description, steps, times_cooked)
+        VALUES ('tomato_soup', 'Tomato Soup', 'tomato_soup.png', 'efgh5678', 'A warm tomato soup.', '[{ "text": "lorem ipsum", "timestamp": 0 }]', 0)
     `);
 
   await db.query(`
-        INSERT INTO Recipe (id, name, icon, video, description, instructions, times_cooked)
-        VALUES ('vegan_salad', 'Vegan Salad', 'vegan_salad.png', 'ijkl9101', 'A fresh vegan salad.', 'Mix lettuce, cucumber, and olive oil.', 0)
+        INSERT INTO Recipe (id, name, icon, video, description, steps, times_cooked)
+        VALUES ('vegan_salad', 'Vegan Salad', 'vegan_salad.png', 'ijkl9101', 'A fresh vegan salad.', '[{ "text": "lorem ipsum", "timestamp": 0 }]', 0)
     `);
 
   await db.query(`
