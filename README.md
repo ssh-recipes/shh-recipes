@@ -25,5 +25,5 @@ Requires:
 Instructions to run:
 - Navigate to the frontend directory
 - Run `npm install`
-- Copy `.env.template` to `.env` and fill our the fields
+- Copy `.env.template` to `.env` and fill out the fields
 - Run `npm run start` to run the frontend
