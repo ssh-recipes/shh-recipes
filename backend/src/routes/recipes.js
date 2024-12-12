@@ -49,7 +49,7 @@ app.get("/", async (c) => {
         );
 
         const [rules] = await db.query(
-          "SELECT DISTINCT ir.rule_id FROM IngredientRule ir , recipeingredient ri WHERE ri.recipe_id = ? AND ir.ingredient_id = ri.ingredient_id",
+          "SELECT DISTINCT ir.rule_id FROM IngredientRule ir , RecipeIngredient ri WHERE ri.recipe_id = ? AND ir.ingredient_id = ri.ingredient_id",
           [recipe.id],
         );
 
