@@ -25,7 +25,7 @@
     "react-native-video": "^6.8.2",
     "react-native-web": "~0.19.13",
     "react-native-web-webview": "^1.0.2",
-    "react-native-webview": "^13.12.4",
+    "react-native-webview": "^13.12.5",
     "react-player": "^2.16.0"
   },
   "devDependencies": {
